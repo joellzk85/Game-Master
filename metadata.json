@@ -1,0 +1,10 @@
+{
+  "name": "Team Building Gaming Dashboard",
+  "description": "An interactive, full-stack, real-time multiplayer dashboard for team building events. Features GM scoring controls, team portal, live leaderboard, shared camera gallery, and an AI-powered C.S.I clue-solving game.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
