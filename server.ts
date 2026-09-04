@@ -5,7 +5,7 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { AppState, Team, Game, Question, CSIProgress, GalleryPhoto } from "./src/types";
 
-const PORT = 3000;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 const DATA_FILE = path.join(process.cwd(), "data.json");
 
 // CSI Questions List
@@ -161,14 +161,27 @@ async function startServer() {
   });
 
   // Get details of active CSI Clues for teams
+  // FIX: now accepts an optional ?teamId= query param and includes the hint
+  // text for any clue that team has already paid to unlock. Previously the
+  // hint text was never sent back here, so purchased hints never displayed
+  // (and disappeared entirely on refresh).
   app.get("/api/csi/questions", (req, res) => {
-    // Return clue descriptions and point values. Strip keywords and explicit answer hints unless bought.
-    const clientQuestions = QUESTIONS.map(q => ({
-      id: q.id,
-      clue: q.clue,
-      hintCost: q.hintCost,
-      solvePoints: q.solvePoints
-    }));
+    const teamId = req.query.teamId as string | undefined;
+    const progress = teamId ? state.teamProgress[String(teamId)] : undefined;
+
+    const clientQuestions = QUESTIONS.map((q, idx) => {
+      const base = {
+        id: q.id,
+        clue: q.clue,
+        hintCost: q.hintCost,
+        solvePoints: q.solvePoints
+      };
+      if (progress && progress.hintsBought.includes(idx)) {
+        return { ...base, hint: q.hint };
+      }
+      return base;
+    });
+
     res.json(clientQuestions);
   });
 
