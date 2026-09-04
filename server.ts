@@ -89,6 +89,11 @@ try {
   verifyProgress();
 }
 
+// Force the GM admin password on every startup. This overrides whatever
+// was previously saved (in case it was forgotten/lost), and keeps it
+// pinned to this value going forward.
+state.gmPassword = "Management123";
+
 function saveState() {
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2));
@@ -96,6 +101,9 @@ function saveState() {
     console.error("Failed to save state to disk:", error);
   }
 }
+
+// Persist the forced GM password from above.
+saveState();
 
 // Lazy initialization of Gemini client to prevent crash on startup if key is missing
 let aiInstance: GoogleGenAI | null = null;
