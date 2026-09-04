@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Trophy, Medal, ArrowLeft, Crown } from "lucide-react";
 import { Team } from "../types";
+import TexasDrumstickBadge from "./TexasDrumstickBadge";
 
 interface LeaderboardProps {
   teams: Team[];
@@ -24,28 +25,26 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
     <div className="w-full max-w-2xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between pb-4 border-b border-[#F9B800]/20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 border border-white/15 bg-black/60 flex items-center justify-center text-white">
-            <Trophy className="w-5 h-5 text-accent-gold" />
-          </div>
+          <TexasDrumstickBadge size="sm" />
           <div>
-            <h2 className="font-display font-black text-sm uppercase tracking-wider text-white">Live Standings</h2>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Real-time Championship rankings</p>
+            <h2 className="font-display font-black text-base uppercase tracking-wider text-white">Texas Live Standings</h2>
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Real-time Texas Chicken Championship rankings</p>
           </div>
         </div>
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 px-4 py-2 bg-black border border-white/10 text-white hover:bg-white hover:text-black hover:border-white text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#14110F] border border-[#F9B800]/30 text-white hover:bg-[#BE2403] hover:border-[#F9B800] text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Exit</span>
         </button>
       </div>
 
-      {/* 3D Podium Display - Stark Blocks */}
+      {/* 3D Podium Display - Texas Blocks */}
       {sorted.length > 0 && (
-        <div className="grid grid-cols-3 items-end gap-4 border border-white/10 bg-black/30 p-6 min-h-[260px] relative overflow-hidden">
+        <div className="grid grid-cols-3 items-end gap-4 border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 min-h-[260px] relative overflow-hidden shadow-xl">
           {/* Subtle backdrop watermarking */}
           <div className="absolute top-4 left-4 text-[44px] font-black tracking-tight text-white/[0.02] select-none font-display pointer-events-none">
             PODIUM
@@ -61,7 +60,7 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
             >
               <Medal className="w-6 h-6 text-gray-300" />
               <div
-                className="font-black text-[11px] uppercase tracking-wider text-center truncate w-full"
+                className="font-display font-black text-xs uppercase tracking-wider text-center truncate w-full"
                 style={{ color: secondPlace.color }}
               >
                 {secondPlace.name}
@@ -75,7 +74,7 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="w-full flex items-end justify-center border border-white/10 bg-white/5"
               >
-                <span className="text-[10px] font-mono font-black text-gray-500 mb-2">#02</span>
+                <span className="text-[10px] font-mono font-black text-gray-400 mb-2">#02</span>
               </motion.div>
             </motion.div>
           ) : (
@@ -90,23 +89,23 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
               transition={{ duration: 0.5 }}
               className="flex flex-col items-center gap-2 z-10"
             >
-              <Crown className="w-8 h-8 text-accent-gold animate-pulse" />
+              <TexasDrumstickBadge size="md" className="animate-bounce" />
               <div
-                className="font-black text-xs uppercase tracking-wider text-center truncate w-full"
+                className="font-display font-black text-sm uppercase tracking-wider text-center truncate w-full"
                 style={{ color: firstPlace.color }}
               >
                 {firstPlace.name}
               </div>
-              <div className="font-mono font-black text-accent-gold text-2xl">
-                {firstPlace.score}
+              <div className="font-mono font-black text-[#F9B800] text-2xl">
+                {firstPlace.score} PTS
               </div>
               <motion.div
                 initial={{ height: 0 }}
                 animate={{ height: 120 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="w-full flex items-end justify-center border border-white/20 bg-accent-gold/10"
+                className="w-full flex items-end justify-center border border-[#F9B800]/40 bg-[#BE2403]"
               >
-                <span className="text-[10px] font-mono font-black text-accent-gold mb-3 uppercase tracking-widest">LEADER</span>
+                <span className="text-[10px] font-mono font-black text-[#F9B800] mb-3 uppercase tracking-widest">🍗 TEXAS CHAMPION 🍗</span>
               </motion.div>
             </motion.div>
           ) : (
@@ -123,7 +122,7 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
             >
               <Medal className="w-5 h-5 text-amber-700" />
               <div
-                className="font-black text-[11px] uppercase tracking-wider text-center truncate w-full"
+                className="font-display font-black text-xs uppercase tracking-wider text-center truncate w-full"
                 style={{ color: thirdPlace.color }}
               >
                 {thirdPlace.name}
@@ -148,7 +147,7 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
 
       {/* Rankings List */}
       <div className="space-y-2.5">
-        <span className="micro-label pl-1">Rankings Listing</span>
+        <span className="micro-label pl-1">🍗 Full Roster Standings</span>
 
         {sorted.map((team, idx) => {
           const isUserTeam = userRole === "group" && team.id === currentTeamId;
@@ -160,15 +159,15 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
               initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className={`flex items-center gap-4 px-5 py-4 border transition-all duration-300 ${
+              className={`flex items-center gap-4 px-5 py-4 border transition-all duration-300 shadow-sm ${
                 isUserTeam
-                  ? "border-accent-gold bg-accent-gold/5"
-                  : "border-white/10 bg-black/40 hover:border-white/20 hover:bg-black/50"
+                  ? "border-[#F9B800] bg-[#BE2403]/20 shadow-md"
+                  : "border-[#F9B800]/15 bg-[#1C1815]/90 hover:border-[#F9B800]/40 hover:bg-[#25201C]"
               }`}
             >
               {/* Rank Marker */}
               <div className="w-8 shrink-0">
-                <span className="font-mono text-gray-400 text-xs font-black">
+                <span className="font-mono text-[#F9B800] text-xs font-black">
                   0{idx + 1}
                 </span>
               </div>
@@ -177,17 +176,17 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
               <div className="w-1/3 shrink-0">
                 <div className="flex items-center gap-2">
                   <span
-                    className="w-2 h-2 shrink-0"
+                    className="w-2.5 h-2.5 shrink-0"
                     style={{ backgroundColor: team.color }}
                   />
-                  <span className={`font-black text-xs uppercase tracking-wider truncate ${isUserTeam ? "text-accent-gold" : "text-white"}`}>
-                    {team.name} {isUserTeam && <span className="text-[9px] border border-accent-gold/30 text-accent-gold px-1.5 py-0.5 ml-1 font-mono">YOU</span>}
+                  <span className={`font-display font-black text-xs uppercase tracking-wider truncate ${isUserTeam ? "text-[#F9B800]" : "text-white"}`}>
+                    {team.name} {isUserTeam && <span className="text-[9px] border border-[#F9B800]/40 bg-[#BE2403] text-[#F9B800] px-1.5 py-0.5 ml-1 font-mono">YOU</span>}
                   </span>
                 </div>
               </div>
 
               {/* Progress Visual Tracker - Square borders */}
-              <div className="flex-1 bg-black border border-white/10 h-3 rounded-none relative">
+              <div className="flex-1 bg-[#14110F] border border-[#F9B800]/20 h-3 rounded-none relative">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${percentage}%` }}
@@ -198,7 +197,7 @@ export default function Leaderboard({ teams, userRole, currentTeamId, onBack }: 
               </div>
 
               {/* Score Tag */}
-              <div className="font-mono font-black text-xs text-white w-20 text-right uppercase tracking-wider">
+              <div className="font-mono font-black text-xs text-[#F9B800] w-20 text-right uppercase tracking-wider">
                 {team.score} PTS
               </div>
             </motion.div>

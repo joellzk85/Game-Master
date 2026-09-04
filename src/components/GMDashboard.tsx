@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Settings, Shield, Plus, Trash2, Eye, EyeOff, LayoutGrid, Check, ArrowLeft, RefreshCw, Key } from "lucide-react";
 import { AppState, Team, Game } from "../types";
+import TexasDrumstickBadge from "./TexasDrumstickBadge";
 
 interface GMDashboardProps {
   state: AppState;
@@ -238,19 +239,17 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
     <div className="w-full max-w-2xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between pb-4 border-b border-[#F9B800]/20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 border border-white/15 bg-black/60 flex items-center justify-center text-white">
-            <Settings className="w-5 h-5 text-accent-gold" />
-          </div>
+          <TexasDrumstickBadge size="sm" />
           <div>
-            <h2 className="font-display font-black text-sm uppercase tracking-wider text-white">GM Settings Control</h2>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Game parameters, teams & administrative security</p>
+            <h2 className="font-display font-black text-base uppercase tracking-wider text-white">Texas Chicken GM Settings</h2>
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Game parameters, team passwords & management security</p>
           </div>
         </div>
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 px-4 py-2 bg-black border border-white/10 text-white hover:bg-white hover:text-black hover:border-white text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#14110F] border border-[#F9B800]/30 text-white hover:bg-[#BE2403] hover:border-[#F9B800] text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Exit</span>
@@ -265,26 +264,26 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
       )}
 
       {error && (
-        <div className="text-xs font-mono font-black uppercase tracking-wider bg-red-950/40 border border-red-900/40 p-4 text-red-400">
+        <div className="text-xs font-mono font-black uppercase tracking-wider bg-[#BE2403]/30 border border-[#BE2403] p-4 text-red-200">
           ERROR: {error}
         </div>
       )}
 
       {/* Title Config Section */}
-      <div className="border border-white/10 bg-black/30 p-6 space-y-3">
-        <span className="micro-label block">🏷️ Tournament / Event Banner Title</span>
+      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-3 shadow-md">
+        <span className="micro-label block">🍗 Championship Banner / Title</span>
         <div className="flex gap-2">
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="flex-1 bg-black border border-white/15 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-white text-white"
+            className="flex-1 bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-[#F9B800] text-white"
             placeholder="Event title..."
           />
           <button
             onClick={handleUpdateTitle}
             disabled={updatingTitle || !title.trim()}
-            className="px-5 py-3 bg-white text-black hover:bg-black hover:text-white border border-white text-xs font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50"
+            className="px-5 py-3 bg-[#F9B800] text-[#120F0D] hover:bg-[#BE2403] hover:text-white border border-[#F9B800] hover:border-[#BE2403] text-xs font-display font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50"
           >
             {updatingTitle ? "..." : "Save"}
           </button>
@@ -292,22 +291,22 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
       </div>
 
       {/* Game status selectors */}
-      <div className="border border-white/10 bg-black/30 p-6 space-y-4">
-        <span className="micro-label block">🎮 Approved Interactive Games</span>
+      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-4 shadow-md">
+        <span className="micro-label block">🍗 Approved Tournament Interactive Games</span>
         <div className="space-y-3">
           {state.games.map((game) => (
             <div
               key={game.id}
-              className="flex items-center justify-between p-4 bg-black/45 border border-white/10"
+              className="flex items-center justify-between p-4 bg-[#14110F] border border-[#F9B800]/20"
             >
               <div>
-                <span className="font-black text-xs text-white uppercase tracking-wider block">{game.name}</span>
-                <span className={`font-mono text-[9px] font-black mt-1 block tracking-widest ${game.open ? "text-emerald-400" : "text-gray-500"}`}>
-                  {game.open ? "● ACTIVE" : "○ CLOSED"}
+                <span className="font-display font-black text-sm text-white uppercase tracking-wider block">{game.name}</span>
+                <span className={`font-mono text-[9px] font-black mt-1 block tracking-widest ${game.open ? "text-[#F9B800]" : "text-gray-500"}`}>
+                  {game.open ? "🍗 ACTIVE" : "○ CLOSED"}
                 </span>
               </div>
 
-              {/* Stark Custom Toggle Switch */}
+              {/* Texas Custom Toggle Switch */}
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
@@ -315,7 +314,7 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
                   onChange={(e) => handleToggleGame(game.id, e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-12 h-6 border border-white/20 bg-black peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white/45 after:h-4 after:w-4 after:transition-all peer-checked:after:bg-white" />
+                <div className="w-12 h-6 border border-[#F9B800]/30 bg-[#14110F] peer-focus:outline-none rounded-none peer peer-checked:bg-[#BE2403] peer-checked:border-[#F9B800] peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-[#F9B800] after:h-4 after:w-4 after:transition-all" />
               </label>
             </div>
           ))}
@@ -323,12 +322,12 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
       </div>
 
       {/* Team Management */}
-      <div className="border border-white/10 bg-black/30 p-6 space-y-4">
+      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-4 shadow-md">
         <div className="flex items-center justify-between">
-          <span className="micro-label">👥 Compo Teams Management</span>
+          <span className="micro-label">🍗 Compo Teams & Passwords Management</span>
           <button
             onClick={() => setShowCreateTeam(!showCreateTeam)}
-            className="flex items-center gap-1 text-[10px] font-black text-accent-gold uppercase tracking-wider hover:underline transition-all cursor-pointer"
+            className="flex items-center gap-1 text-[10px] font-black text-[#F9B800] uppercase tracking-wider hover:underline transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Create Team</span>
@@ -341,25 +340,25 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             onSubmit={handleCreateTeam}
-            className="p-5 bg-black border border-white/10 space-y-4"
+            className="p-5 bg-[#14110F] border border-[#F9B800]/30 space-y-4"
           >
-            <span className="text-[10px] font-black text-white uppercase tracking-widest block border-b border-white/10 pb-2">New Team Registration</span>
+            <span className="text-[10px] font-black text-[#F9B800] uppercase tracking-widest block border-b border-[#F9B800]/20 pb-2">🍗 New Team Registration</span>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[9px] uppercase font-black tracking-widest text-gray-500">Team Name</label>
+                <label className="text-[9px] uppercase font-black tracking-widest text-gray-400">Team Name</label>
                 <input
                   type="text"
                   placeholder="Alpha, Omega, etc..."
                   value={newTeamName}
                   onChange={(e) => setNewTeamName(e.target.value)}
-                  className="w-full bg-black border border-white/15 px-3 py-2 text-xs font-mono uppercase tracking-wider text-white outline-none focus:border-white"
+                  className="w-full bg-[#1C1815] border border-[#F9B800]/30 px-3 py-2 text-xs font-mono uppercase tracking-wider text-white outline-none focus:border-[#F9B800]"
                   required
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] uppercase font-black tracking-widest text-gray-500">Color Tag</label>
+                <label className="text-[9px] uppercase font-black tracking-widest text-gray-400">Color Tag</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
@@ -371,31 +370,31 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
                     type="text"
                     value={newTeamColor}
                     onChange={(e) => setNewTeamColor(e.target.value)}
-                    className="w-full bg-black border border-white/15 px-3 py-2 text-xs font-mono uppercase text-white outline-none"
+                    className="w-full bg-[#1C1815] border border-[#F9B800]/30 px-3 py-2 text-xs font-mono uppercase text-white outline-none"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] uppercase font-black tracking-widest text-gray-500">Team Passcode</label>
+                <label className="text-[9px] uppercase font-black tracking-widest text-gray-400">Team Passcode</label>
                 <input
                   type="text"
                   placeholder="Password for logins..."
                   value={newTeamPassword}
                   onChange={(e) => setNewTeamPassword(e.target.value)}
-                  className="w-full bg-black border border-white/15 px-3 py-2 text-xs font-mono uppercase tracking-wider text-white outline-none focus:border-white"
+                  className="w-full bg-[#1C1815] border border-[#F9B800]/30 px-3 py-2 text-xs font-mono uppercase tracking-wider text-white outline-none focus:border-[#F9B800]"
                   required
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] uppercase font-black tracking-widest text-gray-500">Verify Management Key</label>
+                <label className="text-[9px] uppercase font-black tracking-widest text-gray-400">Verify Management Key</label>
                 <input
                   type="password"
                   placeholder="Verify GM Creation key..."
                   value={verifyCreatePw}
                   onChange={(e) => setVerifyCreatePw(e.target.value)}
-                  className="w-full bg-black border border-white/15 px-3 py-2 text-xs font-mono text-white outline-none focus:border-white"
+                  className="w-full bg-[#1C1815] border border-[#F9B800]/30 px-3 py-2 text-xs font-mono text-white outline-none focus:border-[#F9B800]"
                   required
                 />
               </div>
@@ -412,7 +411,7 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
               <button
                 type="submit"
                 disabled={creatingTeam}
-                className="px-4 py-2 bg-white text-black border border-white hover:bg-black hover:text-white text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+                className="px-4 py-2 bg-[#F9B800] text-[#120F0D] border border-[#F9B800] hover:bg-[#BE2403] hover:text-white text-xs font-black uppercase tracking-wider transition-all cursor-pointer font-display"
               >
                 Create Registered Team
               </button>
@@ -430,20 +429,20 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
             return (
               <div
                 key={team.id}
-                className="p-4 bg-black/45 border border-white/10 space-y-3"
+                className="p-4 bg-[#14110F] border border-[#F9B800]/20 space-y-3 shadow"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-2.5 h-2.5 shrink-0" style={{ backgroundColor: team.color }} />
                     <div>
-                      <span className="font-black text-xs text-white uppercase tracking-wider block">{team.name}</span>
-                      <span className="text-[9px] text-gray-500 font-mono uppercase tracking-widest">{team.score} Points awarded</span>
+                      <span className="font-display font-black text-sm text-white uppercase tracking-wider block">{team.name}</span>
+                      <span className="text-[9px] text-[#F9B800] font-mono uppercase tracking-widest">{team.score} Points awarded</span>
                     </div>
                   </div>
                   
                   <button
                     onClick={() => handleDeleteTeam(team.id)}
-                    className="w-8 h-8 border border-red-500/20 bg-black hover:bg-red-950/20 text-red-400 flex items-center justify-center transition-all cursor-pointer"
+                    className="w-8 h-8 border border-red-500/30 bg-[#1C1815] hover:bg-[#BE2403] text-red-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
                     title="Delete Team"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -451,22 +450,22 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
                 </div>
 
                 {/* Password / Passcode Modifier */}
-                <div className="flex items-center gap-2 pt-2 border-t border-white/5">
-                  <div className="flex items-center gap-1.5 text-gray-500">
-                    <Key className="w-3 h-3 text-accent-gold" />
-                    <span className="text-[9px] font-mono uppercase tracking-widest">Password:</span>
+                <div className="flex items-center gap-2 pt-2 border-t border-[#F9B800]/10">
+                  <div className="flex items-center gap-1.5 text-[#F9B800]">
+                    <Key className="w-3 h-3 text-[#F9B800]" />
+                    <span className="text-[9px] font-mono uppercase tracking-widest">Passcode:</span>
                   </div>
                   <input
                     type="text"
                     value={currentPasswordValue}
                     onChange={(e) => handlePasswordChangeState(team.id, e.target.value)}
                     placeholder="Enter team passcode..."
-                    className="flex-1 bg-black border border-white/10 px-2 py-1 text-xs font-mono text-white outline-none focus:border-white"
+                    className="flex-1 bg-[#1C1815] border border-[#F9B800]/20 px-2 py-1 text-xs font-mono text-white outline-none focus:border-[#F9B800]"
                   />
                   <button
                     onClick={() => handleUpdateTeamPassword(team.id)}
                     disabled={updatingTeamPwId === team.id || !currentPasswordValue.trim()}
-                    className="px-3 py-1 bg-white text-black border border-white text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer hover:bg-black hover:text-white disabled:opacity-50"
+                    className="px-3 py-1 bg-[#F9B800] text-[#120F0D] border border-[#F9B800] text-[9px] font-display font-black uppercase tracking-wider transition-all cursor-pointer hover:bg-[#BE2403] hover:text-white disabled:opacity-50"
                   >
                     {updatingTeamPwId === team.id ? "Saving..." : "Modify"}
                   </button>
@@ -478,28 +477,28 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
       </div>
 
       {/* Security Configurations */}
-      <div className="border border-white/10 bg-black/30 p-6 space-y-4">
+      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-4 shadow-md">
         <span className="micro-label block">🔑 Security & Passcodes Management</span>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider font-black">New GM Admin Password</label>
+            <label className="text-[10px] text-gray-300 uppercase tracking-wider font-black">New GM Admin Password</label>
             <input
               type="password"
               value={newGMPw}
               onChange={(e) => setNewGMPw(e.target.value)}
-              className="w-full bg-black border border-white/15 px-4 py-2.5 text-xs font-mono text-white outline-none focus:border-white"
+              className="w-full bg-[#14110F] border border-[#F9B800]/30 px-4 py-2.5 text-xs font-mono text-white outline-none focus:border-[#F9B800]"
               placeholder="Keep current key..."
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider font-black">New Team Invite Password</label>
+            <label className="text-[10px] text-gray-300 uppercase tracking-wider font-black">New Team Invite Password</label>
             <input
               type="password"
               value={newCreateTeamPw}
               onChange={(e) => setNewCreateTeamPw(e.target.value)}
-              className="w-full bg-black border border-white/15 px-4 py-2.5 text-xs font-mono text-white outline-none focus:border-white"
+              className="w-full bg-[#14110F] border border-[#F9B800]/30 px-4 py-2.5 text-xs font-mono text-white outline-none focus:border-[#F9B800]"
               placeholder="Keep current key..."
             />
           </div>
@@ -508,7 +507,7 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
         <button
           onClick={handleUpdatePasswords}
           disabled={updatingCredentials || (!newGMPw && !newCreateTeamPw)}
-          className="w-full py-3 bg-white text-black hover:bg-black hover:text-white hover:border-white border border-white font-black text-xs uppercase tracking-[0.2em] transition-all cursor-pointer disabled:opacity-50"
+          className="w-full py-3 bg-[#F9B800] text-[#120F0D] hover:bg-[#BE2403] hover:text-white hover:border-[#BE2403] border border-[#F9B800] font-display font-black text-xs uppercase tracking-[0.2em] transition-all cursor-pointer disabled:opacity-50 shadow-lg"
         >
           {updatingCredentials ? "Saving..." : "Update Administration Passwords"}
         </button>

@@ -1,0 +1,76 @@
+{
+  "customTitle": "TEXAS CHICKEN MALAYSIA",
+  "teams": [
+    {
+      "id": 1,
+      "name": "Team Alpha",
+      "banner": "https://images.unsplash.com/photo-1557683316-973673baf926?w=800&auto=format&fit=crop",
+      "score": 200,
+      "color": "#ef4444",
+      "password": "alpha"
+    },
+    {
+      "id": 2,
+      "name": "Team Beta",
+      "banner": "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800&auto=format&fit=crop",
+      "score": 150,
+      "color": "#3b82f6",
+      "password": "beta"
+    },
+    {
+      "id": 3,
+      "name": "Team Gamma",
+      "banner": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&auto=format&fit=crop",
+      "score": 180,
+      "color": "#10b981",
+      "password": "gamma"
+    }
+  ],
+  "games": [
+    {
+      "id": 1,
+      "name": "C.S.I - Crime Scene",
+      "open": true
+    },
+    {
+      "id": 2,
+      "name": "Escape Room",
+      "open": false
+    },
+    {
+      "id": 3,
+      "name": "Scavenger Hunt",
+      "open": false
+    },
+    {
+      "id": 4,
+      "name": "Pictionary",
+      "open": false
+    },
+    {
+      "id": 5,
+      "name": "Minute to Win It",
+      "open": false
+    }
+  ],
+  "gallery": [],
+  "teamProgress": {
+    "1": {
+      "answered": [],
+      "hintsBought": [],
+      "currentQ": 0
+    },
+    "2": {
+      "answered": [],
+      "hintsBought": [],
+      "currentQ": 0
+    },
+    "3": {
+      "answered": [],
+      "hintsBought": [],
+      "currentQ": 0
+    }
+  },
+  "gmPassword": "Management123",
+  "createTeamPassword": "Management123"
+}

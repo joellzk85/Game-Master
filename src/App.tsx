@@ -10,6 +10,7 @@ import ScoreCard from "./components/ScoreCard";
 import Leaderboard from "./components/Leaderboard";
 import CameraGallery from "./components/CameraGallery";
 import CSIHunt from "./components/CSIHunt";
+import TexasDrumstickBadge from "./components/TexasDrumstickBadge";
 
 export default function App() {
   const [state, setState] = useState<AppState | null>(null);
@@ -136,15 +137,18 @@ export default function App() {
       case "score-card": return "METRICS";
       case "camera": return "GALLERY";
       case "gm-settings": return "SETTINGS";
-      case "main-gm-hub": return "ADMIN";
+      case "main-gm-hub": return "TEXAS GM";
       case "team-dashboard": return "DASHBOARD";
-      default: return "METRIC";
+      default: return "TEXAS";
     }
   };
 
   return (
-    <div className="min-h-screen bg-stark-dark text-white font-sans selection:bg-white/20 pb-12 relative overflow-hidden">
+    <div className="min-h-screen bg-texas-dark text-white font-sans selection:bg-texas-red selection:text-white pb-12 relative overflow-hidden">
       
+      {/* Warm Ambient Texas Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[340px] bg-gradient-to-b from-[#BE2403]/20 via-[#F9B800]/5 to-transparent blur-3xl pointer-events-none" />
+
       {/* Bold Typography backdrop watermark */}
       <div className="massive-text select-none uppercase tracking-tighter" style={{ pointerEvents: 'none' }}>
         {getBackdropText()}
@@ -153,37 +157,42 @@ export default function App() {
       {/* Main Container Layer */}
       <div className="max-w-3xl mx-auto px-4 pt-6 space-y-6 relative z-10">
         
-        {/* Top bar styled with Stark layout */}
-        <header className="flex items-center justify-between border-b border-white/10 py-5 px-1 relative z-10">
+        {/* Top bar styled with Texas Chicken Malaysia branding */}
+        <header className="flex items-center justify-between border-b border-[#F9B800]/20 py-4 px-1 relative z-10">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-accent-gold animate-pulse shrink-0" />
-            <h1 className="font-display font-black text-sm sm:text-base tracking-widest bg-clip-text text-white uppercase flex items-center gap-1.5">
-              <span>{state?.customTitle || "CHAMPIONSHIP"}</span>
-              <span className="text-accent-gold font-black">.</span>
-            </h1>
+            {/* Texas Chicken Fried Drumstick Badge */}
+            <TexasDrumstickBadge size="sm" />
+            <div className="flex flex-col">
+              <h1 className="font-display font-black text-base sm:text-lg tracking-wider text-white uppercase flex items-center gap-1.5 leading-none">
+                <span>{state?.customTitle || "TEXAS CHICKEN"}</span>
+              </h1>
+              <span className="text-[9px] font-black tracking-widest text-[#F9B800] uppercase mt-1">
+                MALAYSIA • BOLD HUNT & CSI
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
             {/* Sync trigger */}
             <button
               onClick={() => fetchState(true)}
               disabled={refreshing}
-              className="p-1.5 hover:bg-white/10 rounded-lg text-white/60 hover:text-white transition-all cursor-pointer"
+              className="p-2 bg-[#1C1815] border border-[#F9B800]/30 hover:border-[#F9B800] hover:bg-[#BE2403] rounded-none text-white/80 hover:text-white transition-all cursor-pointer"
               title="Refresh database state"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-accent-gold" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-texas-gold" : ""}`} />
             </button>
 
             {/* Quick dashboard role identifier tags */}
             {userRole === "gm" && (
-              <span className="text-[10px] tracking-widest font-black uppercase border border-white/20 bg-white/5 px-3 py-1 rounded-none text-white font-mono">
-                👑 ADMIN
+              <span className="text-[10px] tracking-widest font-black uppercase border border-[#F9B800]/40 bg-[#BE2403]/30 px-3 py-1.5 rounded-none text-[#F9B800] font-mono flex items-center gap-1.5">
+                <TexasDrumstickBadge size="xs" showBorder={false} /> ADMIN
               </span>
             )}
             {userRole === "group" && currentTeamObj && (
               <span
-                className="text-[10px] tracking-widest font-black uppercase border px-3 py-1 rounded-none text-white font-mono"
-                style={{ borderColor: `${currentTeamObj.color}88`, backgroundColor: `${currentTeamObj.color}15` }}
+                className="text-[10px] tracking-widest font-black uppercase border px-3 py-1.5 rounded-none text-white font-mono"
+                style={{ borderColor: `${currentTeamObj.color}AA`, backgroundColor: `${currentTeamObj.color}25` }}
               >
                 👥 {currentTeamObj.name}
               </span>
@@ -195,8 +204,8 @@ export default function App() {
         <main>
           {state === null ? (
             <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center text-slate-500">
-              <RefreshCw className="w-8 h-8 animate-spin text-purple-500 mb-3" />
-              <p className="text-sm">Connecting to championship server...</p>
+              <RefreshCw className="w-8 h-8 animate-spin text-texas-gold mb-3" />
+              <p className="text-sm font-bold text-gray-400">Connecting to Texas Chicken Championship...</p>
             </div>
           ) : (
             <AnimatePresence mode="wait">
@@ -223,33 +232,37 @@ export default function App() {
                   exit={{ opacity: 0, y: -15 }}
                   className="space-y-6"
                 >
-                  {/* Hero welcome card */}
-                  <div className="border border-white/15 bg-black/60 p-6 sm:p-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.02] rounded-full pointer-events-none" />
+                  {/* Hero welcome card styled with Texas Chicken brand */}
+                  <div className="border border-[#F9B800]/30 bg-gradient-to-br from-[#241E1A] via-[#1C1714] to-[#2B211B] p-6 sm:p-8 relative overflow-hidden shadow-xl">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#BE2403]/10 rounded-full blur-2xl pointer-events-none" />
                     
-                    <div className="relative z-10 space-y-4">
-                      <div className="space-y-1">
-                        <span className="micro-label">Championship Hub</span>
-                        <h2 className="font-display font-black text-2xl sm:text-3xl text-white uppercase tracking-tight leading-none">
-                          THE <span className="outline-heading">ADMIN</span><br />
-                          CENTRAL CONSOLE
-                        </h2>
+                    <div className="relative z-10 space-y-3">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#BE2403] text-white text-[10px] font-black uppercase tracking-widest border border-[#F9B800]/40 shadow-sm">
+                        <TexasDrumstickBadge size="xs" showBorder={false} />
+                        <span>TEXAS CHICKEN GM HEADQUARTERS</span>
                       </div>
-                      <p className="text-sm text-slate-400 leading-relaxed max-w-xl font-light">
-                        Welcome, Game Master! Adjust points presets in real-time, toggle active tournament rounds, configure invite keys, and monitor team uploads.
+                      <h2 className="font-display font-black text-2xl sm:text-4xl text-white uppercase tracking-tight leading-none">
+                        THE <span className="text-[#F9B800]">COMMAND</span><br />
+                        CENTRAL CONSOLE
+                      </h2>
+                      <p className="text-sm text-gray-300 leading-relaxed max-w-xl font-normal">
+                        Manage live event points, adjust team passcodes, toggle active tournament rounds, and verify forensic submissions in real-time.
                       </p>
                     </div>
                   </div>
 
                   {/* Leaderboard snippet inside hub */}
-                  <div className="border border-white/10 bg-black/30 p-6 space-y-4">
+                  <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="micro-label">Live Championship Podium</span>
+                      <div className="flex items-center gap-2">
+                        <TexasDrumstickBadge size="xs" showBorder={false} />
+                        <span className="micro-label">Live Championship Standings</span>
+                      </div>
                       <button
                         onClick={() => navigate("leaderboard")}
-                        className="text-xs font-black uppercase tracking-widest hover:underline text-white/80 cursor-pointer"
+                        className="text-xs font-black uppercase tracking-widest hover:text-[#F9B800] text-gray-300 cursor-pointer flex items-center gap-1"
                       >
-                        Open Full Rankings →
+                        Full Rankings →
                       </button>
                     </div>
 
@@ -257,65 +270,65 @@ export default function App() {
                       {[...state.teams].sort((a, b) => b.score - a.score).slice(0, 3).map((team, idx) => (
                         <div
                           key={team.id}
-                          className="p-4 bg-black/40 border border-white/10 flex items-center justify-between"
+                          className="p-4 bg-[#14110F] border border-[#F9B800]/20 flex items-center justify-between"
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="font-mono text-xs font-black text-accent-gold">
+                            <span className="font-mono text-xs font-black text-[#F9B800]">
                               0{idx + 1}
                             </span>
                             <span className="font-black uppercase tracking-wider text-xs" style={{ color: team.color }}>
                               {team.name}
                             </span>
                           </div>
-                          <span className="font-mono font-black text-sm text-white">{team.score} PTS</span>
+                          <span className="font-mono font-black text-sm text-[#F9B800]">{team.score} PTS</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* GM Action grid with stark buttons */}
+                  {/* GM Action grid with Texas Chicken styling */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <button
                       onClick={() => navigate("score-card")}
-                      className="p-6 border border-white/10 bg-black/60 hover:bg-white hover:text-black hover:border-white transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer group"
+                      className="p-6 border border-[#F9B800]/20 bg-[#1C1815] hover:bg-[#BE2403] hover:text-white hover:border-[#F9B800] transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer group shadow-md"
                     >
-                      <span className="text-xl mb-2 group-hover:scale-110 transition-transform">📝</span>
-                      <span className="font-black text-xs uppercase tracking-widest">Score Card</span>
-                      <span className="text-[9px] text-slate-500 uppercase mt-1 group-hover:text-black/50">Edit Points</span>
+                      <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">📝</span>
+                      <span className="font-display font-black text-xs uppercase tracking-widest">Score Card</span>
+                      <span className="text-[9px] text-gray-400 uppercase mt-1 group-hover:text-white/80">Adjust Points</span>
                     </button>
 
                     <button
                       onClick={() => navigate("leaderboard")}
-                      className="p-6 border border-white/10 bg-black/60 hover:bg-white hover:text-black hover:border-white transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer group"
+                      className="p-6 border border-[#F9B800]/20 bg-[#1C1815] hover:bg-[#BE2403] hover:text-white hover:border-[#F9B800] transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer group shadow-md"
                     >
-                      <span className="text-xl mb-2 group-hover:scale-110 transition-transform">🏆</span>
-                      <span className="font-black text-xs uppercase tracking-widest">Standings</span>
-                      <span className="text-[9px] text-slate-500 uppercase mt-1 group-hover:text-black/50">Leaderboard</span>
+                      <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">🏆</span>
+                      <span className="font-display font-black text-xs uppercase tracking-widest">Standings</span>
+                      <span className="text-[9px] text-gray-400 uppercase mt-1 group-hover:text-white/80">Leaderboard</span>
                     </button>
 
                     <button
                       onClick={() => navigate("camera")}
-                      className="p-6 border border-white/10 bg-black/60 hover:bg-white hover:text-black hover:border-white transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer group"
+                      className="p-6 border border-[#F9B800]/20 bg-[#1C1815] hover:bg-[#BE2403] hover:text-white hover:border-[#F9B800] transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer group shadow-md"
                     >
-                      <span className="text-xl mb-2 group-hover:scale-110 transition-transform">📷</span>
-                      <span className="font-black text-xs uppercase tracking-widest">Lens Gallery</span>
-                      <span className="text-[9px] text-slate-500 uppercase mt-1 group-hover:text-black/50">Event Feed</span>
+                      <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">📷</span>
+                      <span className="font-display font-black text-xs uppercase tracking-widest">Gallery</span>
+                      <span className="text-[9px] text-gray-400 uppercase mt-1 group-hover:text-white/80">Event Feed</span>
                     </button>
 
                     <button
                       onClick={() => navigate("gm-settings")}
-                      className="p-6 border border-white/10 bg-black/60 hover:bg-white hover:text-black hover:border-white transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer group"
+                      className="p-6 border border-[#F9B800]/20 bg-[#1C1815] hover:bg-[#BE2403] hover:text-white hover:border-[#F9B800] transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer group shadow-md"
                     >
-                      <span className="text-xl mb-2 group-hover:scale-110 transition-transform">⚙️</span>
-                      <span className="font-black text-xs uppercase tracking-widest">Settings</span>
-                      <span className="text-[9px] text-slate-500 uppercase mt-1 group-hover:text-black/50">Controls</span>
+                      <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">⚙️</span>
+                      <span className="font-display font-black text-xs uppercase tracking-widest">Settings</span>
+                      <span className="text-[9px] text-gray-400 uppercase mt-1 group-hover:text-white/80">GM Controls</span>
                     </button>
                   </div>
 
                   {/* Logout button */}
                   <button
                     onClick={handleLogout}
-                    className="w-full py-4 bg-black border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+                    className="w-full py-4 bg-[#14110F] border border-[#BE2403]/40 text-[#FF7A7A] hover:bg-[#BE2403] hover:text-white hover:border-[#BE2403] text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow-lg"
                   >
                     🚪 Terminate Administration Session
                   </button>

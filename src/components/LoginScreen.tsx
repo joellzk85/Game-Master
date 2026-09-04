@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { ShieldAlert, Users, Lock, Key, ChevronRight, ArrowLeft, Trophy } from "lucide-react";
 import { Team } from "../types";
+import TexasDrumstickBadge from "./TexasDrumstickBadge";
 
 interface LoginScreenProps {
   teams: Team[];
@@ -58,24 +59,28 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-black/80 border border-white/15 overflow-hidden p-8 relative">
+      <div className="w-full max-w-md bg-[#1C1815]/95 border border-[#F9B800]/30 shadow-2xl p-8 relative overflow-hidden">
         
-        {/* Subtle backdrop ornament */}
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-white/[0.01] rounded-full pointer-events-none" />
+        {/* Subtle warm glow ornament */}
+        <div className="absolute -top-32 -left-32 w-72 h-72 bg-[#BE2403]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-72 h-72 bg-[#F9B800]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10">
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 border border-white/20 bg-black flex items-center justify-center">
-              <Trophy className="w-8 h-8 text-white animate-pulse" />
-            </div>
+          <div className="flex justify-center mb-5">
+            {/* Texas Chicken Fried Drumstick Logo Emblem */}
+            <TexasDrumstickBadge size="xl" className="shadow-2xl shadow-[#BE2403]/60 ring-4 ring-[#BE2403]/50" />
           </div>
 
           <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-[#BE2403] text-white text-[9px] font-black uppercase tracking-widest mb-2 border border-[#F9B800]/40 shadow-sm">
+              <TexasDrumstickBadge size="xs" showBorder={false} />
+              <span>TEXAS CHICKEN MALAYSIA</span>
+            </div>
             <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-white uppercase leading-none">
-              CHAMPIONSHIP <span className="outline-heading">PORTAL</span>
+              CHAMPIONSHIP <span className="text-[#F9B800]">PORTAL</span>
             </h1>
-            <p className="text-[10px] text-gray-500 uppercase tracking-[0.15em] font-bold mt-2.5">
-              Enter secure space to sync scores & log forensic clues
+            <p className="text-[10px] text-gray-400 uppercase tracking-[0.15em] font-bold mt-2">
+              BOLD FLAVOR • BIG CHALLENGE • LEGENDARY TEAMS
             </p>
           </div>
 
@@ -89,40 +94,40 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
             >
               <button
                 onClick={() => selectRole("gm")}
-                className="w-full flex items-center gap-4 p-5 bg-black/40 hover:bg-white border border-white/10 hover:border-white transition-all duration-300 group cursor-pointer text-left"
+                className="w-full flex items-center gap-4 p-5 bg-[#14110F] hover:bg-[#25201C] border border-[#F9B800]/20 hover:border-[#F9B800] transition-all duration-300 group cursor-pointer text-left shadow-md"
                 id="select-gm-btn"
               >
-                <div className="w-12 h-12 bg-white/5 group-hover:bg-black/10 flex items-center justify-center text-white group-hover:text-black transition-colors border border-white/10 group-hover:border-black/20 shrink-0">
+                <div className="w-12 h-12 bg-[#BE2403]/20 border border-[#BE2403]/40 group-hover:bg-[#BE2403] flex items-center justify-center text-[#F9B800] group-hover:text-white transition-colors shrink-0">
                   <ShieldAlert className="w-5 h-5" />
                 </div>
                 <div className="flex-grow">
-                  <div className="font-black text-xs uppercase tracking-wider text-white group-hover:text-black transition-colors">
-                    Game Master
+                  <div className="font-display font-black text-sm uppercase tracking-wider text-white group-hover:text-[#F9B800] transition-colors">
+                    Game Master HQ
                   </div>
-                  <div className="text-[9px] text-gray-500 uppercase tracking-widest mt-1 group-hover:text-black/70">
-                    Manage state & adjust point sets
+                  <div className="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">
+                    Live scoring, game controls & passwords
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-black group-hover:translate-x-1 transition-all shrink-0" />
+                <ChevronRight className="w-4 h-4 text-[#F9B800] group-hover:translate-x-1 transition-all shrink-0" />
               </button>
 
               <button
                 onClick={() => selectRole("team")}
-                className="w-full flex items-center gap-4 p-5 bg-black/40 hover:bg-white border border-white/10 hover:border-white transition-all duration-300 group cursor-pointer text-left"
+                className="w-full flex items-center gap-4 p-5 bg-[#14110F] hover:bg-[#25201C] border border-[#F9B800]/20 hover:border-[#F9B800] transition-all duration-300 group cursor-pointer text-left shadow-md"
                 id="select-team-btn"
               >
-                <div className="w-12 h-12 bg-white/5 group-hover:bg-black/10 flex items-center justify-center text-white group-hover:text-black transition-colors border border-white/10 group-hover:border-black/20 shrink-0">
+                <div className="w-12 h-12 bg-[#F9B800]/20 border border-[#F9B800]/40 group-hover:bg-[#F9B800] flex items-center justify-center text-[#F9B800] group-hover:text-[#120F0D] transition-colors shrink-0">
                   <Users className="w-5 h-5" />
                 </div>
                 <div className="flex-grow">
-                  <div className="font-black text-xs uppercase tracking-wider text-white group-hover:text-black transition-colors">
-                    Team Player Access
+                  <div className="font-display font-black text-sm uppercase tracking-wider text-white group-hover:text-[#F9B800] transition-colors">
+                    Team Participant Portal
                   </div>
-                  <div className="text-[9px] text-gray-500 uppercase tracking-widest mt-1 group-hover:text-black/70">
-                    View standing & verify clues
+                  <div className="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">
+                    View standing, photos & forensic CSI hunt
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-black group-hover:translate-x-1 transition-all shrink-0" />
+                <ChevronRight className="w-4 h-4 text-[#F9B800] group-hover:translate-x-1 transition-all shrink-0" />
               </button>
             </motion.div>
           )}
@@ -138,12 +143,12 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
                 <button
                   type="button"
                   onClick={() => setView("select")}
-                  className="p-1.5 hover:bg-white/15 border border-white/10 text-white transition-colors cursor-pointer"
+                  className="p-1.5 bg-[#14110F] hover:bg-[#BE2403] border border-[#F9B800]/30 text-white transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
-                <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  {view === "gm" ? "GM Security Center" : "Team Entry Portal"}
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#F9B800]">
+                  {view === "gm" ? "🍗 GM Administration Access" : "🍗 Team Player Sign-In"}
                 </span>
               </div>
 
@@ -153,7 +158,7 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
                   <select
                     value={selectedTeamId}
                     onChange={(e) => setSelectedTeamId(e.target.value)}
-                    className="w-full bg-black border border-white/15 px-4 py-3.5 text-sm text-white outline-none focus:border-white transition-colors cursor-pointer font-mono"
+                    className="w-full bg-[#14110F] border border-[#F9B800]/30 px-4 py-3.5 text-sm text-white outline-none focus:border-[#F9B800] transition-colors cursor-pointer font-mono"
                     required
                   >
                     <option value="">-- Choose team --</option>
@@ -168,10 +173,10 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
 
               <div className="space-y-1.5">
                 <label className="micro-label">
-                  {view === "gm" ? "Admin Security Key" : "Team Entry Password"}
+                  {view === "gm" ? "GM Security Password" : "Team Passcode"}
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-3.5 text-gray-500">
+                  <span className="absolute left-4 top-3.5 text-[#F9B800]">
                     <Key className="w-4 h-4" />
                   </span>
                   <input
@@ -179,7 +184,7 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
                     placeholder={view === "gm" ? "Enter administrative passcode..." : "Enter team passcode..."}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-black border border-white/15 pl-11 pr-4 py-3.5 text-sm text-white outline-none focus:border-white transition-colors font-mono"
+                    className="w-full bg-[#14110F] border border-[#F9B800]/30 pl-11 pr-4 py-3.5 text-sm text-white outline-none focus:border-[#F9B800] transition-colors font-mono"
                     required
                   />
                 </div>
@@ -189,7 +194,7 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
                 <motion.div
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-xs text-red-400 font-bold bg-red-950/20 border border-red-900/30 p-3 flex items-center gap-2"
+                  className="text-xs text-red-300 font-bold bg-[#BE2403]/30 border border-[#BE2403] p-3 flex items-center gap-2"
                   id="login-error-message"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
@@ -200,15 +205,15 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-white text-black hover:bg-black hover:text-white border border-white font-black text-xs uppercase tracking-[0.2em] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 bg-[#F9B800] text-[#120F0D] hover:bg-[#BE2403] hover:text-white border border-[#F9B800] hover:border-[#BE2403] font-display font-black text-sm uppercase tracking-[0.2em] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 id="submit-login-btn"
               >
                 {loading ? (
-                  <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>Access Dashboard</span>
+                    <Lock className="w-4 h-4" />
+                    <span>Enter Championship</span>
                   </>
                 )}
               </button>

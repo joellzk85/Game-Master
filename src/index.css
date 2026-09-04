@@ -1,11 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-display: "Barlow Condensed", "Oswald", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  --color-accent-gold: #D4AF37;
+  --color-accent-gold: #F9B800;
+  --color-texas-gold: #F9B800;
+  --color-texas-gold-light: #FFCF33;
+  --color-texas-red: #BE2403;
+  --color-texas-red-dark: #8F1800;
+  --color-texas-dark: #120F0D;
+  --color-texas-surface: #1C1815;
+  --color-texas-surface-card: #25201C;
 }
 
 /* Custom Bold Typography classes and utilities */
@@ -13,9 +20,9 @@
   font-size: 200px;
   font-weight: 900;
   line-height: 0.75;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.04em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.02);
+  color: rgba(249, 184, 0, 0.025);
   position: absolute;
   top: 50%;
   left: 50%;
@@ -23,6 +30,7 @@
   white-space: nowrap;
   z-index: 0;
   pointer-events: none;
+  font-family: var(--font-display);
 }
 
 @media (max-width: 640px) {
@@ -32,7 +40,7 @@
 }
 
 .outline-heading {
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4);
+  -webkit-text-stroke: 1.5px rgba(249, 184, 0, 0.85);
   color: transparent;
   font-weight: 900;
   text-transform: uppercase;
@@ -42,38 +50,67 @@
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  font-weight: 700;
-  color: #888888;
+  font-weight: 800;
+  color: #F9B800;
   display: block;
 }
 
-/* Custom stark transitions and border themes */
+/* Texas Chicken themed buttons and borders */
 .stark-border {
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(249, 184, 0, 0.2);
 }
 
 .stark-button {
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(249, 184, 0, 0.4);
   padding: 12px 24px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-weight: 700;
+  letter-spacing: 0.15em;
+  font-weight: 800;
   transition: all 0.2s ease-in-out;
+  background-color: #BE2403;
+  color: #ffffff;
 }
 
 .stark-button:hover:not(:disabled) {
-  background-color: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
+  background-color: #F9B800;
+  color: #120F0D;
+  border-color: #F9B800;
 }
 
 .accent-gold {
-  color: #D4AF37;
+  color: #F9B800;
 }
 
 .bg-stark-dark {
-  background-color: #080808;
+  background-color: #120F0D;
 }
+
+/* Texas Chicken Signature Elements */
+.texas-star-badge {
+  background: linear-gradient(135deg, #BE2403 0%, #8F1800 100%);
+  border: 1px solid rgba(249, 184, 0, 0.4);
+}
+
+.texas-gold-btn {
+  background-color: #F9B800;
+  color: #120F0D;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  transition: all 0.2s ease-in-out;
+}
+
+.texas-gold-btn:hover {
+  background-color: #BE2403;
+  color: #ffffff;
+}
+
+.texas-card {
+  background-color: rgba(28, 24, 21, 0.85);
+  border: 1px solid rgba(249, 184, 0, 0.18);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
 
 

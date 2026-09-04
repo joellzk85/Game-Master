@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { Edit3, Check, Plus, Minus, ArrowLeft, RotateCcw } from "lucide-react";
 import { Team } from "../types";
+import TexasDrumstickBadge from "./TexasDrumstickBadge";
 
 interface ScoreCardProps {
   teams: Team[];
@@ -69,19 +70,17 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
     <div className="w-full max-w-2xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between pb-4 border-b border-[#F9B800]/20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 border border-white/15 bg-black/60 flex items-center justify-center text-white">
-            <Edit3 className="w-5 h-5 text-accent-gold" />
-          </div>
+          <TexasDrumstickBadge size="sm" />
           <div>
-            <h2 className="font-display font-black text-sm uppercase tracking-wider text-white">Score Controller</h2>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Award point presets or apply custom weights</p>
+            <h2 className="font-display font-black text-base uppercase tracking-wider text-white">Texas Score Controller</h2>
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Award challenge points, penalties & team score resets</p>
           </div>
         </div>
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 px-4 py-2 bg-black border border-white/10 text-white hover:bg-white hover:text-black hover:border-white text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#14110F] border border-[#F9B800]/30 text-white hover:bg-[#BE2403] hover:border-[#F9B800] text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>
@@ -89,7 +88,7 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
       </div>
 
       {error && (
-        <div className="text-xs font-mono font-black uppercase tracking-wider bg-red-950/40 border border-red-900/40 p-4 text-red-400">
+        <div className="text-xs font-mono font-black uppercase tracking-wider bg-[#BE2403]/30 border border-[#BE2403] p-4 text-red-200">
           ERROR: {error}
         </div>
       )}
@@ -101,15 +100,15 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
             key={team.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-black/40 border border-white/10 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden"
+            className="bg-[#1C1815]/90 border border-[#F9B800]/20 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden shadow-md"
             style={{ borderLeftWidth: "4px", borderLeftColor: team.color }}
           >
             <div>
-              <h4 className="font-black text-xs uppercase tracking-widest" style={{ color: team.color }}>
+              <h4 className="font-display font-black text-sm uppercase tracking-widest" style={{ color: team.color }}>
                 {team.name}
               </h4>
               <p className="font-mono text-xs font-black text-gray-400 mt-1 uppercase">
-                Current: <span className="text-white font-black">{team.score} PTS</span>
+                Score: <span className="text-[#F9B800] font-black">{team.score} PTS</span>
               </p>
             </div>
 
@@ -137,7 +136,7 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
                     handleAdjustScore(team.id, 0, true);
                   }
                 }}
-                className="px-3 py-2 border border-red-500/30 bg-red-500/5 hover:bg-red-500 hover:text-white text-red-400 font-mono font-black text-xs transition-all duration-200 cursor-pointer flex items-center gap-1.5 shrink-0"
+                className="px-3 py-2 border border-red-500/40 bg-[#BE2403]/20 hover:bg-[#BE2403] hover:text-white text-red-400 font-mono font-black text-xs transition-all duration-200 cursor-pointer flex items-center gap-1.5 shrink-0 shadow"
                 title="Reset team score to 0"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -149,14 +148,14 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
       </div>
 
       {/* Custom points adjustment form */}
-      <div className="border border-white/10 bg-black/30 p-6">
-        <span className="micro-label mb-4 block">Custom Score Adjuster</span>
+      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 shadow-md">
+        <span className="micro-label mb-4 block">🍗 Custom Score Adjuster</span>
 
         <form onSubmit={handleCustomSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <select
             value={customTeamId}
             onChange={(e) => setCustomTeamId(e.target.value === "" ? "" : Number(e.target.value))}
-            className="bg-black border border-white/15 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-white text-white cursor-pointer"
+            className="bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-[#F9B800] text-white cursor-pointer"
             required
           >
             <option value="">Select team...</option>
@@ -172,13 +171,13 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
             placeholder="Points (e.g. +75 or -35)"
             value={customPoints}
             onChange={(e) => setCustomPoints(e.target.value)}
-            className="bg-black border border-white/15 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-white text-white"
+            className="bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-[#F9B800] text-white"
             required
           />
 
           <button
             type="submit"
-            className="bg-white text-black hover:bg-black hover:text-white hover:border-white border border-white font-black text-xs uppercase tracking-[0.2em] px-4 py-3 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            className="bg-[#F9B800] text-[#120F0D] hover:bg-[#BE2403] hover:text-white hover:border-[#BE2403] border border-[#F9B800] font-display font-black text-xs uppercase tracking-[0.2em] px-4 py-3 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow"
           >
             <Check className="w-4 h-4" />
             <span>Apply Score</span>

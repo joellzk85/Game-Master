@@ -48,7 +48,7 @@ interface SavedState {
 
 // In-Memory state that is backed up to disk
 let state: SavedState = {
-  customTitle: "PADINI THINKING OUT OF THE BOX",
+  customTitle: "TEXAS CHICKEN MALAYSIA",
   teams: DEFAULT_TEAMS,
   games: DEFAULT_GAMES,
   gallery: [],
