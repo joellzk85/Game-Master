@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Settings, Shield, Plus, Trash2, Eye, EyeOff, LayoutGrid, Check, ArrowLeft, RefreshCw, Key } from "lucide-react";
+import { Settings, Shield, Plus, Trash2, Eye, EyeOff, LayoutGrid, Check, ArrowLeft, RefreshCw, Key, Radio } from "lucide-react";
 import { AppState, Team, Game } from "../types";
 import TexasDrumstickBadge from "./TexasDrumstickBadge";
+import GMDispatchPanel from "./GMDispatchPanel";
 
 interface GMDashboardProps {
   state: AppState;
@@ -268,6 +269,14 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
           ERROR: {error}
         </div>
       )}
+
+      {/* Real-time GM Live Dispatch */}
+      <GMDispatchPanel
+        teams={state.teams}
+        gmPassword={gmPassword}
+        onMessageSent={onStateUpdated}
+        compact={true}
+      />
 
       {/* Title Config Section */}
       <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-3 shadow-md">

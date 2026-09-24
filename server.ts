@@ -1,9 +1,11 @@
 import express from "express";
+import http from "http";
 import path from "path";
 import fs from "fs";
+import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
-import { AppState, Team, Game, Question, CSIProgress, GalleryPhoto } from "./src/types";
+import { AppState, Team, Game, Question, CSIProgress, GalleryPhoto, NotificationItem } from "./src/types";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 const DATA_FILE = path.join(process.cwd(), "data.json");
@@ -42,6 +44,7 @@ interface SavedState {
   games: Game[];
   gallery: GalleryPhoto[];
   teamProgress: Record<string, CSIProgress>;
+  notifications: NotificationItem[];
   gmPassword?: string;
   createTeamPassword?: string;
 }
@@ -53,12 +56,16 @@ let state: SavedState = {
   games: DEFAULT_GAMES,
   gallery: [],
   teamProgress: {},
+  notifications: [],
   gmPassword: "Management123",
   createTeamPassword: "Management123"
 };
 
 // Initialize default progress for existing teams if not set
 function verifyProgress() {
+  if (!state.notifications) {
+    state.notifications = [];
+  }
   state.teams.forEach(t => {
     const key = String(t.id);
     if (!state.teamProgress[key]) {
@@ -127,6 +134,25 @@ function getGeminiClient(): GoogleGenAI {
 
 async function startServer() {
   const app = express();
+  const server = http.createServer(app);
+  const wss = new WebSocketServer({ server, path: "/ws" });
+
+  function broadcastWS(payload: any) {
+    try {
+      const message = JSON.stringify(payload);
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(message);
+        }
+      });
+    } catch (wsErr) {
+      console.error("Error broadcasting WebSocket message:", wsErr);
+    }
+  }
+
+  wss.on("connection", (ws) => {
+    ws.send(JSON.stringify({ type: "connected", timestamp: new Date().toISOString() }));
+  });
 
   // Increase request limit size to handle base64 image uploads smoothly
   app.use(express.json({ limit: "50mb" }));
@@ -164,6 +190,7 @@ async function startServer() {
       games: state.games,
       gallery: state.gallery,
       teamProgress: state.teamProgress,
+      notifications: state.notifications || [],
       csiQuestionsCount: QUESTIONS.length
     });
   });
@@ -220,18 +247,102 @@ async function startServer() {
 
   // Score adjustments (GM ONLY)
   app.post("/api/score/adjust", checkGM, (req, res) => {
-    const { targetTeamId, points, isReset } = req.body;
+    const { targetTeamId, points, isReset, reason } = req.body;
     const team = state.teams.find(t => t.id === Number(targetTeamId));
     if (!team) {
       return res.status(404).json({ error: "Team not found" });
     }
+    const ptsNum = Number(points);
+    const prevScore = team.score;
     if (isReset) {
       team.score = 0;
     } else {
-      team.score += Number(points);
+      team.score += ptsNum;
     }
+
+    const diffText = isReset ? "Reset to 0" : (ptsNum >= 0 ? `+${ptsNum} pts` : `${ptsNum} pts`);
+    const notifId = "notif_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    const notif: NotificationItem = {
+      id: notifId,
+      type: "score_update",
+      title: isReset
+        ? `Score Reset: ${team.name}`
+        : ptsNum >= 0
+        ? `+${ptsNum} Points: ${team.name}`
+        : `${ptsNum} Points: ${team.name}`,
+      message: reason && reason.trim()
+        ? reason.trim()
+        : isReset
+        ? `Game Master reset ${team.name}'s score to 0.`
+        : ptsNum >= 0
+        ? `Game Master awarded ${ptsNum} pts to ${team.name}! Current total: ${team.score} pts.`
+        : `Game Master deducted ${Math.abs(ptsNum)} pts from ${team.name}. Current total: ${team.score} pts.`,
+      targetTeamId: team.id,
+      targetTeamName: team.name,
+      points: isReset ? 0 : ptsNum,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    };
+
+    state.notifications = [notif, ...(state.notifications || [])].slice(0, 50);
     saveState();
-    res.json({ success: true, newScore: team.score });
+
+    // Real-time broadcast to all clients via WebSocket
+    broadcastWS({
+      type: "notification",
+      notification: notif
+    });
+    broadcastWS({
+      type: "state_update",
+      reason: "score_adjust",
+      teamId: team.id,
+      newScore: team.score,
+      prevScore
+    });
+
+    res.json({ success: true, newScore: team.score, notification: notif });
+  });
+
+  // GM Message / Broadcast Dispatch (GM ONLY)
+  app.post("/api/messages/send", checkGM, (req, res) => {
+    const { targetTeamId, message, title, type } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: "Message content cannot be empty." });
+    }
+
+    let targetName = "All Teams";
+    let resolvedTargetId: number | "all" = "all";
+    if (targetTeamId !== undefined && targetTeamId !== "all" && targetTeamId !== "") {
+      const tId = Number(targetTeamId);
+      const found = state.teams.find(t => t.id === tId);
+      if (found) {
+        targetName = found.name;
+        resolvedTargetId = tId;
+      }
+    }
+
+    const notifId = "msg_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    const notif: NotificationItem = {
+      id: notifId,
+      type: type || (resolvedTargetId === "all" ? "broadcast" : "alert"),
+      title: title && title.trim()
+        ? title.trim()
+        : (resolvedTargetId === "all" ? "📢 GM Official Transmission" : `🎯 Priority Note: ${targetName}`),
+      message: message.trim(),
+      targetTeamId: resolvedTargetId,
+      targetTeamName: targetName,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    };
+
+    state.notifications = [notif, ...(state.notifications || [])].slice(0, 50);
+    saveState();
+
+    // Broadcast WebSocket notification to all clients
+    broadcastWS({
+      type: "notification",
+      notification: notif
+    });
+
+    res.json({ success: true, notification: notif });
   });
 
   // Toggle active games (GM ONLY)
@@ -243,6 +354,7 @@ async function startServer() {
     }
     game.open = Boolean(open);
     saveState();
+    broadcastWS({ type: "state_update", reason: "games_toggle", games: state.games });
     res.json({ success: true, games: state.games });
   });
 
@@ -252,6 +364,7 @@ async function startServer() {
     if (title && title.trim()) {
       state.customTitle = title.trim();
       saveState();
+      broadcastWS({ type: "state_update", reason: "title_update", title: state.customTitle });
       res.json({ success: true, title: state.customTitle });
     } else {
       res.status(400).json({ error: "Invalid title" });
@@ -290,6 +403,7 @@ async function startServer() {
     };
 
     saveState();
+    broadcastWS({ type: "state_update", reason: "team_created" });
     res.json({ success: true, team: { id: newTeam.id, name: newTeam.name, color: newTeam.color, score: newTeam.score } });
   });
 
@@ -299,6 +413,7 @@ async function startServer() {
     state.teams = state.teams.filter(t => t.id !== Number(targetTeamId));
     delete state.teamProgress[String(targetTeamId)];
     saveState();
+    broadcastWS({ type: "state_update", reason: "team_deleted" });
     res.json({ success: true });
   });
 
@@ -661,7 +776,7 @@ Respond ONLY with this JSON. No markdown backticks, no other text.`;
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server listening at http://0.0.0.0:${PORT}`);
   });
 }

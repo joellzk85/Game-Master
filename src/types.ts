@@ -36,10 +36,25 @@ export interface GalleryPhoto {
   timestamp: string;
 }
 
+export type NotificationType = "score_update" | "broadcast" | "alert" | "hint" | "praise";
+
+export interface NotificationItem {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  targetTeamId: number | "all"; // team id or 'all'
+  targetTeamName?: string;
+  points?: number; // for score updates (+50, -10, etc.)
+  timestamp: string;
+  read?: boolean;
+}
+
 export interface AppState {
   customTitle: string;
   teams: Team[];
   games: Game[];
   gallery: GalleryPhoto[];
   teamProgress: Record<string, CSIProgress>; // Keyed by string representation of team id
+  notifications?: NotificationItem[];
 }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Award, Camera, Trophy, Eye, EyeOff, Lock, RefreshCw, Upload, Sparkles } from "lucide-react";
+import { Award, Camera, Trophy, Eye, EyeOff, Lock, RefreshCw, Upload, Sparkles, Radio, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import { AppState, Team } from "../types";
 import TexasDrumstickBadge from "./TexasDrumstickBadge";
 
@@ -114,6 +114,61 @@ export default function TeamDashboard({ currentTeam, state, onStateUpdated, onNa
           Logout
         </button>
       </div>
+
+      {/* Latest Live Dispatch Notice if present */}
+      {(() => {
+        const notifs = (state.notifications || []).filter(
+          (n) => n.targetTeamId === "all" || n.targetTeamId === team.id
+        );
+        const latest = notifs[0];
+        if (!latest) return null;
+
+        const isDirect = latest.targetTeamId === team.id;
+        const isScore = latest.type === "score_update";
+        const points = latest.points ?? 0;
+
+        return (
+          <div
+            className={`p-4 border relative overflow-hidden transition-all shadow-lg ${
+              isDirect
+                ? "bg-[#BE2403]/20 border-[#BE2403]"
+                : "bg-[#1C1815] border-[#F9B800]/40"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#F9B800] flex items-center gap-1.5">
+                  <Radio className="w-3.5 h-3.5 text-[#F9B800]" />
+                  {isDirect ? "DIRECT TRANSMISSION FOR YOUR TEAM" : "LATEST GM BROADCAST"}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-gray-400">{latest.timestamp}</span>
+            </div>
+
+            <div className="flex items-start justify-between gap-3">
+              <h4 className="font-display font-black text-xs uppercase tracking-wider text-white">
+                {latest.title}
+              </h4>
+              {isScore && points !== 0 && (
+                <span
+                  className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-xs border ${
+                    points > 0
+                      ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400"
+                      : "bg-rose-500/10 border-rose-500/40 text-rose-400"
+                  }`}
+                >
+                  {points > 0 ? `+${points}` : points} PTS
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs text-gray-300 mt-1 leading-relaxed">
+              {latest.message}
+            </p>
+          </div>
+        );
+      })()}
 
       {/* Team Banner / Card block */}
       <div className="border border-[#F9B800]/30 bg-[#1C1815]/90 relative overflow-hidden shadow-xl">

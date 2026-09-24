@@ -14,8 +14,10 @@ interface ScoreCardProps {
 export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }: ScoreCardProps) {
   const [customTeamId, setCustomTeamId] = useState<number | "">("");
   const [customPoints, setCustomPoints] = useState<string>("");
+  const [customReason, setCustomReason] = useState<string>("");
   const [loading, setLoading] = useState<number | null>(null); // tracks active team id loading
   const [error, setError] = useState("");
+  const [lastActionNotice, setLastActionNotice] = useState<string>("");
 
   const presets = [
     { label: "+100", value: 100, color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/20" },
@@ -25,9 +27,10 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
     { label: "-10", value: -10, color: "text-rose-400 border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/20" }
   ];
 
-  const handleAdjustScore = async (targetTeamId: number, points: number, isReset?: boolean) => {
+  const handleAdjustScore = async (targetTeamId: number, points: number, isReset?: boolean, reason?: string) => {
     setLoading(targetTeamId);
     setError("");
+    setLastActionNotice("");
     try {
       const res = await fetch("/api/score/adjust", {
         method: "POST",
@@ -36,11 +39,15 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
           targetTeamId,
           points,
           isReset,
+          reason,
           gmPassword
         })
       });
 
       if (res.ok) {
+        const teamObj = teams.find(t => t.id === targetTeamId);
+        const teamName = teamObj ? teamObj.name : "Team";
+        setLastActionNotice(`⚡ Real-time Toast alert dispatched to ${teamName}!`);
         onScoreUpdated();
       } else {
         const d = await res.json();
@@ -61,8 +68,9 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
       setError("Please enter a valid number of points.");
       return;
     }
-    handleAdjustScore(Number(customTeamId), pts);
+    handleAdjustScore(Number(customTeamId), pts, false, customReason.trim() || undefined);
     setCustomPoints("");
+    setCustomReason("");
     setCustomTeamId("");
   };
 
@@ -86,6 +94,16 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
           <span>Back</span>
         </button>
       </div>
+
+      {lastActionNotice && (
+        <div className="text-xs font-mono font-black uppercase tracking-wider bg-emerald-950/50 border border-emerald-500/60 p-3.5 text-emerald-300 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>{lastActionNotice}</span>
+          </div>
+          <span className="text-[10px] text-emerald-400/80">Toast Delivered</span>
+        </div>
+      )}
 
       {error && (
         <div className="text-xs font-mono font-black uppercase tracking-wider bg-[#BE2403]/30 border border-[#BE2403] p-4 text-red-200">
@@ -148,40 +166,58 @@ export default function ScoreCard({ teams, gmPassword, onScoreUpdated, onBack }:
       </div>
 
       {/* Custom points adjustment form */}
-      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 shadow-md">
-        <span className="micro-label mb-4 block">🍗 Custom Score Adjuster</span>
+      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 shadow-md space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="micro-label block">🍗 Custom Score Adjuster</span>
+          <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Live alert to affected team
+          </span>
+        </div>
 
-        <form onSubmit={handleCustomSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <select
-            value={customTeamId}
-            onChange={(e) => setCustomTeamId(e.target.value === "" ? "" : Number(e.target.value))}
-            className="bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-[#F9B800] text-white cursor-pointer"
-            required
-          >
-            <option value="">Select team...</option>
-            {teams.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name.toUpperCase()}
-              </option>
-            ))}
-          </select>
+        <form onSubmit={handleCustomSubmit} className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <select
+              value={customTeamId}
+              onChange={(e) => setCustomTeamId(e.target.value === "" ? "" : Number(e.target.value))}
+              className="bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-[#F9B800] text-white cursor-pointer"
+              required
+            >
+              <option value="">Select recipient team...</option>
+              {teams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name.toUpperCase()} (CURRENT: {t.score} PTS)
+                </option>
+              ))}
+            </select>
 
-          <input
-            type="number"
-            placeholder="Points (e.g. +75 or -35)"
-            value={customPoints}
-            onChange={(e) => setCustomPoints(e.target.value)}
-            className="bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-[#F9B800] text-white"
-            required
-          />
+            <input
+              type="number"
+              placeholder="Point value (e.g. +75 or -35)"
+              value={customPoints}
+              onChange={(e) => setCustomPoints(e.target.value)}
+              className="bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-xs font-mono uppercase tracking-wider outline-none focus:border-[#F9B800] text-white"
+              required
+            />
+          </div>
 
-          <button
-            type="submit"
-            className="bg-[#F9B800] text-[#120F0D] hover:bg-[#BE2403] hover:text-white hover:border-[#BE2403] border border-[#F9B800] font-display font-black text-xs uppercase tracking-[0.2em] px-4 py-3 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow"
-          >
-            <Check className="w-4 h-4" />
-            <span>Apply Score</span>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input
+              type="text"
+              placeholder="Reason / Note (optional, e.g. Speed bonus, Late penalty)"
+              value={customReason}
+              onChange={(e) => setCustomReason(e.target.value)}
+              className="sm:col-span-2 bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-xs font-sans tracking-wide outline-none focus:border-[#F9B800] text-white"
+            />
+
+            <button
+              type="submit"
+              className="bg-[#F9B800] text-[#120F0D] hover:bg-[#BE2403] hover:text-white hover:border-[#BE2403] border border-[#F9B800] font-display font-black text-xs uppercase tracking-[0.2em] px-4 py-3 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow"
+            >
+              <Check className="w-4 h-4" />
+              <span>Apply & Alert</span>
+            </button>
+          </div>
         </form>
       </div>
     </div>
