@@ -15,7 +15,10 @@ import ToastContainer from "./components/ToastContainer";
 import { ActiveToast } from "./components/ToastNotification";
 import NotificationDrawer from "./components/NotificationDrawer";
 import GMDispatchPanel from "./components/GMDispatchPanel";
+import RealTimeClock from "./components/RealTimeClock";
+import EventTimerBanner from "./components/EventTimerBanner";
 import { soundManager } from "./utils/audio";
+import { setServerTimeFromWS, syncServerTime } from "./utils/time";
 
 export default function App() {
   const [state, setState] = useState<AppState | null>(null);
@@ -55,6 +58,7 @@ export default function App() {
   // On initial mount: restore stored credentials
   useEffect(() => {
     fetchState();
+    syncServerTime();
 
     const savedRole = localStorage.getItem("event_role");
     const savedTeamId = localStorage.getItem("event_team_id");
@@ -104,7 +108,16 @@ export default function App() {
           try {
             const data = JSON.parse(event.data);
 
-            if (data.type === "state_update") {
+            if (data.type === "connected") {
+              if (data.serverTime) {
+                setServerTimeFromWS(data.serverTime);
+              }
+              if (data.timer) {
+                setState((prev) => (prev ? { ...prev, timer: data.timer } : prev));
+              }
+            } else if (data.type === "timer_update" && data.timer) {
+              setState((prev) => (prev ? { ...prev, timer: data.timer } : prev));
+            } else if (data.type === "state_update") {
               fetchState();
             } else if (data.type === "notification" && data.notification) {
               const notif: NotificationItem = data.notification;
@@ -329,9 +342,12 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Real-time Synchronized Clock */}
+            <RealTimeClock />
+
             {/* Real-time Connection Indicator */}
             <div
-              className="hidden sm:flex items-center gap-1.5 px-2 py-1 bg-[#1C1815] border border-[#F9B800]/20 text-[10px] font-mono"
+              className="hidden md:flex items-center gap-1.5 px-2 py-1.5 bg-[#1C1815] border border-[#F9B800]/20 text-[10px] font-mono"
               title={wsConnected ? "Connected to Real-Time Server" : "Reconnecting to Real-Time Server..."}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${wsConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
@@ -395,6 +411,14 @@ export default function App() {
             )}
           </div>
         </header>
+
+        {/* Synchronized Event / Round Countdown Banner */}
+        <EventTimerBanner
+          timer={state?.timer}
+          userRole={userRole}
+          gmPassword={gmPassword}
+          onTimerUpdated={fetchState}
+        />
 
         {/* Dynamic Screen Renders */}
         <main>
@@ -647,6 +671,12 @@ export default function App() {
                   <TeamDashboard
                     currentTeam={currentTeamObj}
                     state={state}
+                    teamPassword={teamPassword}
+                    gmPassword={gmPassword}
+                    onTeamPasswordUpdated={(newPw) => {
+                      setTeamPassword(newPw);
+                      localStorage.setItem("event_team_pass", newPw);
+                    }}
                     onStateUpdated={fetchState}
                     onNavigate={navigate}
                     onLogout={handleLogout}

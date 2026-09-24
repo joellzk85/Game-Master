@@ -5,7 +5,7 @@ import fs from "fs";
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
-import { AppState, Team, Game, Question, CSIProgress, GalleryPhoto, NotificationItem } from "./src/types";
+import { AppState, Team, Game, Question, CSIProgress, GalleryPhoto, NotificationItem, EventTimer } from "./src/types";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 const DATA_FILE = path.join(process.cwd(), "data.json");
@@ -45,6 +45,7 @@ interface SavedState {
   gallery: GalleryPhoto[];
   teamProgress: Record<string, CSIProgress>;
   notifications: NotificationItem[];
+  timer?: EventTimer;
   gmPassword?: string;
   createTeamPassword?: string;
 }
@@ -58,13 +59,29 @@ let state: SavedState = {
   teamProgress: {},
   notifications: [],
   gmPassword: "Management123",
-  createTeamPassword: "Management123"
+  createTeamPassword: "Management123",
+  timer: {
+    active: false,
+    targetEndTime: null,
+    durationSeconds: 1800,
+    pausedRemainingSeconds: null,
+    label: "Round 1"
+  }
 };
 
 // Initialize default progress for existing teams if not set
 function verifyProgress() {
   if (!state.notifications) {
     state.notifications = [];
+  }
+  if (!state.timer) {
+    state.timer = {
+      active: false,
+      targetEndTime: null,
+      durationSeconds: 1800,
+      pausedRemainingSeconds: null,
+      label: "Round 1"
+    };
   }
   state.teams.forEach(t => {
     const key = String(t.id);
@@ -151,7 +168,21 @@ async function startServer() {
   }
 
   wss.on("connection", (ws) => {
-    ws.send(JSON.stringify({ type: "connected", timestamp: new Date().toISOString() }));
+    ws.send(JSON.stringify({
+      type: "connected",
+      serverTime: Date.now(),
+      timestamp: new Date().toISOString(),
+      timer: state.timer
+    }));
+
+    ws.on("message", (raw) => {
+      try {
+        const msg = JSON.parse(raw.toString());
+        if (msg.type === "ping") {
+          ws.send(JSON.stringify({ type: "pong", clientTime: msg.clientTime, serverTime: Date.now() }));
+        }
+      } catch {}
+    });
   });
 
   // Increase request limit size to handle base64 image uploads smoothly
@@ -181,6 +212,17 @@ async function startServer() {
 
   // --- API ROUTES ---
 
+  // Real-time synchronization endpoint
+  app.get("/api/time", (req, res) => {
+    const now = new Date();
+    res.json({
+      utc: now.toISOString(),
+      epoch: Date.now(),
+      serverTimezoneOffset: now.getTimezoneOffset(),
+      serverTimestamp: now.toISOString()
+    });
+  });
+
   // Get current active event state (safe for client, hides passwords)
   app.get("/api/state", (req, res) => {
     const clientTeams = state.teams.map(({ password, ...t }) => t);
@@ -191,6 +233,7 @@ async function startServer() {
       gallery: state.gallery,
       teamProgress: state.teamProgress,
       notifications: state.notifications || [],
+      timer: state.timer,
       csiQuestionsCount: QUESTIONS.length
     });
   });
@@ -280,7 +323,7 @@ async function startServer() {
       targetTeamId: team.id,
       targetTeamName: team.name,
       points: isReset ? 0 : ptsNum,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      timestamp: new Date().toISOString()
     };
 
     state.notifications = [notif, ...(state.notifications || [])].slice(0, 50);
@@ -330,7 +373,7 @@ async function startServer() {
       message: message.trim(),
       targetTeamId: resolvedTargetId,
       targetTeamName: targetName,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      timestamp: new Date().toISOString()
     };
 
     state.notifications = [notif, ...(state.notifications || [])].slice(0, 50);
@@ -343,6 +386,74 @@ async function startServer() {
     });
 
     res.json({ success: true, notification: notif });
+  });
+
+  // Event Round Countdown Timer Control (GM ONLY)
+  app.post("/api/timer/control", checkGM, (req, res) => {
+    const { action, durationMinutes, label } = req.body;
+
+    if (!state.timer) {
+      state.timer = {
+        active: false,
+        targetEndTime: null,
+        durationSeconds: 1800,
+        pausedRemainingSeconds: null,
+        label: "Round 1"
+      };
+    }
+
+    const now = Date.now();
+
+    if (action === "start") {
+      const durationSec = durationMinutes ? Number(durationMinutes) * 60 : state.timer.durationSeconds || 1800;
+      state.timer.durationSeconds = durationSec;
+      state.timer.targetEndTime = now + durationSec * 1000;
+      state.timer.active = true;
+      state.timer.pausedRemainingSeconds = null;
+      if (label && label.trim()) state.timer.label = label.trim();
+    } else if (action === "pause") {
+      if (state.timer.active && state.timer.targetEndTime) {
+        state.timer.pausedRemainingSeconds = Math.max(0, Math.round((state.timer.targetEndTime - now) / 1000));
+        state.timer.active = false;
+        state.timer.targetEndTime = null;
+      }
+    } else if (action === "resume") {
+      const remainingSec = state.timer.pausedRemainingSeconds || state.timer.durationSeconds || 1800;
+      state.timer.targetEndTime = now + remainingSec * 1000;
+      state.timer.active = true;
+      state.timer.pausedRemainingSeconds = null;
+    } else if (action === "extend") {
+      const addMinutes = Number(req.body.addMinutes) || 5;
+      if (state.timer.active && state.timer.targetEndTime) {
+        state.timer.targetEndTime += addMinutes * 60 * 1000;
+        state.timer.durationSeconds += addMinutes * 60;
+      } else if (state.timer.pausedRemainingSeconds) {
+        state.timer.pausedRemainingSeconds += addMinutes * 60;
+        state.timer.durationSeconds += addMinutes * 60;
+      }
+    } else if (action === "reset") {
+      const durationSec = durationMinutes ? Number(durationMinutes) * 60 : 1800;
+      state.timer = {
+        active: false,
+        targetEndTime: null,
+        durationSeconds: durationSec,
+        pausedRemainingSeconds: null,
+        label: label ? label.trim() : (state.timer.label || "Round 1")
+      };
+    }
+
+    saveState();
+
+    broadcastWS({
+      type: "timer_update",
+      timer: state.timer
+    });
+    broadcastWS({
+      type: "state_update",
+      reason: "timer_update"
+    });
+
+    res.json({ success: true, timer: state.timer });
   });
 
   // Toggle active games (GM ONLY)
@@ -457,16 +568,34 @@ async function startServer() {
   });
 
   // Change Team Banner
-  app.post("/api/teams/banner", checkTeamAuth, (req, res) => {
-    const { teamId, banner } = req.body;
+  app.post("/api/teams/banner", (req, res) => {
+    const { teamId, password, gmPassword, banner } = req.body;
     const team = state.teams.find(t => t.id === Number(teamId));
-    if (team) {
-      team.banner = banner;
-      saveState();
-      res.json({ success: true, banner: team.banner });
-    } else {
-      res.status(404).json({ error: "Team not found" });
+    if (!team) {
+      return res.status(404).json({ error: "Team not found" });
     }
+
+    const isTeamAuthed = Boolean(password && team.password === password);
+    const isGMAuthed = Boolean(gmPassword && gmPassword === state.gmPassword);
+
+    if (!isTeamAuthed && !isGMAuthed) {
+      return res.status(401).json({ error: "Access denied. Invalid Team credentials." });
+    }
+
+    if (!banner || typeof banner !== "string" || !banner.trim()) {
+      return res.status(400).json({ error: "Banner image cannot be empty." });
+    }
+
+    team.banner = banner.trim();
+    saveState();
+
+    broadcastWS({
+      type: "state_update",
+      reason: "team_banner_updated",
+      teamId: team.id
+    });
+
+    res.json({ success: true, banner: team.banner });
   });
 
   // Security configuration updates (GM ONLY)
@@ -624,7 +753,7 @@ Respond ONLY with this JSON. No markdown backticks, no other text.`;
             id: photoId,
             url: imageBase64,
             teamName: team.name,
-            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            timestamp: new Date().toISOString()
           };
           state.gallery.unshift(galleryPhoto);
         }
@@ -684,7 +813,7 @@ Respond ONLY with this JSON. No markdown backticks, no other text.`;
             id: photoId,
             url: imageBase64,
             teamName: team.name,
-            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            timestamp: new Date().toISOString()
           });
         }
 
@@ -735,7 +864,7 @@ Respond ONLY with this JSON. No markdown backticks, no other text.`;
       id: photoId,
       url: imageBase64,
       teamName: teamName || "Spectator",
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      timestamp: new Date().toISOString()
     };
 
     state.gallery.unshift(newPhoto);

@@ -4,7 +4,7 @@
     {
       "id": 1,
       "name": "Team Alpha",
-      "banner": "https://images.unsplash.com/photo-1557683316-973673baf926?w=800&auto=format&fit=crop",
+      "banner": "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&auto=format&fit=crop&q=80",
       "score": 200,
       "color": "#ef4444",
       "password": "alpha"
@@ -12,7 +12,7 @@
     {
       "id": 2,
       "name": "Team Beta",
-      "banner": "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800&auto=format&fit=crop",
+      "banner": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&auto=format&fit=crop&q=80",
       "score": 150,
       "color": "#3b82f6",
       "password": "beta"
@@ -71,6 +71,14 @@
       "currentQ": 0
     }
   },
+  "notifications": [],
   "gmPassword": "Management123",
-  "createTeamPassword": "Management123"
+  "createTeamPassword": "Management123",
+  "timer": {
+    "active": false,
+    "targetEndTime": null,
+    "durationSeconds": 1800,
+    "pausedRemainingSeconds": null,
+    "label": "Round 1"
+  }
 }

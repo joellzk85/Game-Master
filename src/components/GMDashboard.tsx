@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Settings, Shield, Plus, Trash2, Eye, EyeOff, LayoutGrid, Check, ArrowLeft, RefreshCw, Key, Radio } from "lucide-react";
+import { Settings, Shield, Plus, Trash2, Eye, EyeOff, LayoutGrid, Check, ArrowLeft, RefreshCw, Key, Radio, Image as ImageIcon } from "lucide-react";
 import { AppState, Team, Game } from "../types";
 import TexasDrumstickBadge from "./TexasDrumstickBadge";
 import GMDispatchPanel from "./GMDispatchPanel";
+import GMTimerControl from "./GMTimerControl";
+import BannerModal from "./BannerModal";
 
 interface GMDashboardProps {
   state: AppState;
@@ -38,6 +40,7 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
   const [teamsWithPasswords, setTeamsWithPasswords] = useState<Team[]>([]);
   const [editingPasswords, setEditingPasswords] = useState<Record<number, string>>({});
   const [updatingTeamPwId, setUpdatingTeamPwId] = useState<number | null>(null);
+  const [editingBannerTeam, setEditingBannerTeam] = useState<Team | null>(null);
 
   const fetchTeamsWithPasswords = async () => {
     try {
@@ -278,6 +281,13 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
         compact={true}
       />
 
+      {/* Synchronized Event / Round Timer Control */}
+      <GMTimerControl
+        timer={state.timer}
+        gmPassword={gmPassword}
+        onTimerUpdated={onStateUpdated}
+      />
+
       {/* Title Config Section */}
       <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-3 shadow-md">
         <span className="micro-label block">🍗 Championship Banner / Title</span>
@@ -449,13 +459,23 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
                     </div>
                   </div>
                   
-                  <button
-                    onClick={() => handleDeleteTeam(team.id)}
-                    className="w-8 h-8 border border-red-500/30 bg-[#1C1815] hover:bg-[#BE2403] text-red-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
-                    title="Delete Team"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setEditingBannerTeam(team)}
+                      className="px-2.5 py-1.5 border border-[#F9B800]/30 bg-[#1C1815] hover:bg-[#BE2403] text-[#F9B800] hover:text-white flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider transition-all cursor-pointer shadow-xs"
+                      title="Customize Team Banner"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span>Banner</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTeam(team.id)}
+                      className="w-8 h-8 border border-red-500/30 bg-[#1C1815] hover:bg-[#BE2403] text-red-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                      title="Delete Team"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Password / Passcode Modifier */}
@@ -521,6 +541,20 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
           {updatingCredentials ? "Saving..." : "Update Administration Passwords"}
         </button>
       </div>
+
+      {/* GM Banner Management Modal */}
+      {editingBannerTeam && (
+        <BannerModal
+          isOpen={Boolean(editingBannerTeam)}
+          onClose={() => setEditingBannerTeam(null)}
+          team={editingBannerTeam}
+          gmPassword={gmPassword}
+          onBannerUpdated={() => {
+            onStateUpdated();
+            fetchTeamsWithPasswords();
+          }}
+        />
+      )}
     </div>
   );
 }

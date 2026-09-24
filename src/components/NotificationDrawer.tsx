@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { NotificationItem, Team } from "../types";
 import TexasDrumstickBadge from "./TexasDrumstickBadge";
+import { formatRealTime, formatRelativeTime } from "../utils/time";
 
 interface NotificationDrawerProps {
   isOpen: boolean;
@@ -207,9 +208,10 @@ export default function NotificationDrawer({
                             {item.targetTeamId === "all" ? "GLOBAL BROADCAST" : item.targetTeamName}
                           </span>
                         </div>
-                        <span className="text-[10px] font-mono text-gray-500 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {item.timestamp}
+                        <span className="text-[10px] font-mono text-gray-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-[#F9B800]" />
+                          <span>{formatRealTime(item.timestamp)}</span>
+                          <span className="text-gray-500 text-[9px] hidden sm:inline">({formatRelativeTime(item.timestamp)})</span>
                         </span>
                       </div>
 

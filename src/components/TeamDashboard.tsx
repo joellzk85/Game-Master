@@ -3,24 +3,38 @@ import { motion } from "motion/react";
 import { Award, Camera, Trophy, Eye, EyeOff, Lock, RefreshCw, Upload, Sparkles, Radio, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import { AppState, Team } from "../types";
 import TexasDrumstickBadge from "./TexasDrumstickBadge";
+import { formatRealTime, formatRelativeTime } from "../utils/time";
+import BannerModal from "./BannerModal";
 
 interface TeamDashboardProps {
   currentTeam: Team;
   state: AppState;
+  teamPassword?: string;
+  gmPassword?: string;
+  onTeamPasswordUpdated?: (newPw: string) => void;
   onStateUpdated: () => void;
   onNavigate: (page: string) => void;
   onLogout: () => void;
 }
 
-export default function TeamDashboard({ currentTeam, state, onStateUpdated, onNavigate, onLogout }: TeamDashboardProps) {
+export default function TeamDashboard({
+  currentTeam,
+  state,
+  teamPassword,
+  gmPassword,
+  onTeamPasswordUpdated,
+  onStateUpdated,
+  onNavigate,
+  onLogout
+}: TeamDashboardProps) {
   // Sync current team state because other GMs might have adjusted points or parameters since they logged in
   const team = state.teams.find((t) => t.id === currentTeam.id) || currentTeam;
   
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
   const rank = sorted.findIndex((t) => t.id === team.id) + 1;
 
-  // Banner change state
-  const [uploadingBanner, setUploadingBanner] = useState(false);
+  // Banner modal state
+  const [showBannerModal, setShowBannerModal] = useState(false);
 
   // Password modification state
   const [currentPw, setCurrentPw] = useState("");
@@ -28,40 +42,6 @@ export default function TeamDashboard({ currentTeam, state, onStateUpdated, onNa
   const [pwError, setPwError] = useState("");
   const [pwSuccess, setPwSuccess] = useState("");
   const [updatingPw, setUpdatingPw] = useState(false);
-
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingBanner(true);
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string;
-      try {
-        const res = await fetch("/api/teams/banner", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            teamId: team.id,
-            password: currentTeam.password, // use the stored initial password for auth proxy
-            banner: base64
-          })
-        });
-
-        if (res.ok) {
-          onStateUpdated();
-          alert("🖼️ Team banner updated!");
-        } else {
-          alert("Failed to update banner.");
-        }
-      } catch (err) {
-        alert("Banner upload network error.");
-      } finally {
-        setUploadingBanner(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +62,7 @@ export default function TeamDashboard({ currentTeam, state, onStateUpdated, onNa
 
       if (res.ok) {
         setPwSuccess("Password updated successfully!");
+        onTeamPasswordUpdated?.(newPw.trim());
         setCurrentPw("");
         setNewPw("");
         onStateUpdated();
@@ -143,7 +124,10 @@ export default function TeamDashboard({ currentTeam, state, onStateUpdated, onNa
                   {isDirect ? "DIRECT TRANSMISSION FOR YOUR TEAM" : "LATEST GM BROADCAST"}
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-gray-400">{latest.timestamp}</span>
+              <span className="text-[10px] font-mono text-gray-400 flex items-center gap-1">
+                {formatRealTime(latest.timestamp)}
+                <span className="text-gray-500 text-[9px]">({formatRelativeTime(latest.timestamp)})</span>
+              </span>
             </div>
 
             <div className="flex items-start justify-between gap-3">
@@ -192,20 +176,13 @@ export default function TeamDashboard({ currentTeam, state, onStateUpdated, onNa
 
           {/* Edit Banner button */}
           <div className="absolute top-4 right-4">
-            <input
-              type="file"
-              id="team-banner-input"
-              accept="image/*"
-              className="hidden"
-              onChange={handleBannerUpload}
-              disabled={uploadingBanner}
-            />
             <button
-              onClick={() => document.getElementById("team-banner-input")?.click()}
-              className="px-3.5 py-2 bg-[#14110F]/90 border border-[#F9B800]/30 hover:border-[#F9B800] text-[10px] font-black uppercase tracking-wider hover:bg-[#BE2403] transition-all text-white cursor-pointer flex items-center gap-1.5 shadow"
+              type="button"
+              onClick={() => setShowBannerModal(true)}
+              className="px-3.5 py-2 bg-[#14110F]/90 border border-[#F9B800]/40 hover:border-[#F9B800] text-[10px] font-black uppercase tracking-wider hover:bg-[#BE2403] transition-all text-white cursor-pointer flex items-center gap-1.5 shadow"
             >
               <Upload className="w-3.5 h-3.5 text-[#F9B800]" />
-              <span>{uploadingBanner ? "Saving..." : "Change Card Art"}</span>
+              <span>Change Card Art</span>
             </button>
           </div>
         </div>
@@ -232,51 +209,78 @@ export default function TeamDashboard({ currentTeam, state, onStateUpdated, onNa
 
       {/* Games Round Board */}
       <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-4 shadow-md">
-        <span className="micro-label">🍗 Approved Tournament Games</span>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {state.games.map((game) => {
-            const isCSI = game.name.includes("C.S.I");
-            const canPlay = game.open && isCSI;
-
-            return (
-              <motion.div
-                key={game.id}
-                whileHover={canPlay ? { y: -2 } : {}}
-                onClick={() => canPlay && onNavigate("csi-game")}
-                className={`p-5 border flex flex-col justify-between min-h-[140px] transition-all relative overflow-hidden ${
-                  canPlay
-                    ? "border-[#F9B800]/40 bg-[#BE2403]/10 hover:border-[#F9B800] hover:bg-[#BE2403]/20 cursor-pointer shadow-md"
-                    : "border-[#F9B800]/10 bg-[#14110F]/60 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                {/* Glowing status tag */}
-                {game.open && (
-                  <div className="absolute top-4 right-4 flex items-center gap-1 bg-[#BE2403] border border-[#F9B800]/40 text-[#F9B800] text-[9px] font-black px-2.5 py-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#F9B800] animate-ping" />
-                    <span>ACTIVE</span>
-                  </div>
-                )}
-
-                <div>
-                  <span className="text-2xl block mb-2">{isCSI ? "🔍" : "🎯"}</span>
-                  <h4 className={`font-display font-black text-sm uppercase tracking-wider ${game.open ? "text-white" : "text-gray-500"}`}>
-                    {game.name}
-                  </h4>
-                  <p className="text-xs text-gray-300 mt-1 font-light">
-                    {isCSI ? "Forensic photo scavenger hunt & AI validation" : "Awaiting unlock by Game Master"}
-                  </p>
-                </div>
-
-                {canPlay && (
-                  <span className="text-[11px] font-black uppercase tracking-wider text-[#F9B800] mt-3 flex items-center gap-1 hover:underline">
-                    🍗 Click to Play Challenge →
-                  </span>
-                )}
-              </motion.div>
-            );
-          })}
+        <div className="flex items-center justify-between">
+          <span className="micro-label">🍗 Approved Tournament Games</span>
+          <span className="text-[10px] font-mono text-[#F9B800] uppercase tracking-wider">
+            {state.games.filter((g) => g.open).length} Active
+          </span>
         </div>
+
+        {(() => {
+          const approvedGames = state.games.filter((g) => g.open);
+
+          if (approvedGames.length === 0) {
+            return (
+              <div className="p-8 text-center border border-[#F9B800]/10 bg-[#14110F]/80 space-y-2">
+                <Lock className="w-8 h-8 text-[#F9B800]/60 mx-auto" />
+                <h4 className="font-display font-black text-sm uppercase tracking-wider text-gray-300">
+                  No Games Currently Unlocked
+                </h4>
+                <p className="text-xs text-gray-400 font-light max-w-sm mx-auto">
+                  The Game Master has not opened any tournament rounds yet. Stand by for live broadcast instructions.
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {approvedGames.map((game) => {
+                const isCSI = game.name.includes("C.S.I");
+                const canPlay = isCSI;
+
+                return (
+                  <motion.div
+                    key={game.id}
+                    whileHover={canPlay ? { y: -2 } : {}}
+                    onClick={() => canPlay && onNavigate("csi-game")}
+                    className={`p-5 border flex flex-col justify-between min-h-[140px] transition-all relative overflow-hidden ${
+                      canPlay
+                        ? "border-[#F9B800]/40 bg-[#BE2403]/10 hover:border-[#F9B800] hover:bg-[#BE2403]/20 cursor-pointer shadow-md"
+                        : "border-[#F9B800]/20 bg-[#14110F]/80 text-white"
+                    }`}
+                  >
+                    {/* Glowing status tag */}
+                    <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-[#BE2403] border border-[#F9B800]/40 text-[#F9B800] text-[9px] font-black px-2.5 py-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#F9B800] animate-ping" />
+                      <span>ACTIVE</span>
+                    </div>
+
+                    <div>
+                      <span className="text-2xl block mb-2">{isCSI ? "🔍" : "🎯"}</span>
+                      <h4 className="font-display font-black text-sm uppercase tracking-wider text-white">
+                        {game.name}
+                      </h4>
+                      <p className="text-xs text-gray-300 mt-1 font-light">
+                        {isCSI ? "Forensic photo scavenger hunt & AI validation" : "Approved by Game Master"}
+                      </p>
+                    </div>
+
+                    {canPlay ? (
+                      <span className="text-[11px] font-black uppercase tracking-wider text-[#F9B800] mt-3 flex items-center gap-1 hover:underline">
+                        🍗 Click to Play Challenge →
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 mt-3 flex items-center gap-1">
+                        ✓ Open for participation
+                      </span>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Navigation Quick Links block with Texas Chicken styled buttons */}
@@ -333,6 +337,16 @@ export default function TeamDashboard({ currentTeam, state, onStateUpdated, onNa
           </button>
         </form>
       </div>
+
+      {/* Banner Customizer Modal */}
+      <BannerModal
+        isOpen={showBannerModal}
+        onClose={() => setShowBannerModal(false)}
+        team={team}
+        teamPassword={teamPassword}
+        gmPassword={gmPassword}
+        onBannerUpdated={onStateUpdated}
+      />
     </div>
   );
 }

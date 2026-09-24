@@ -50,6 +50,14 @@ export interface NotificationItem {
   read?: boolean;
 }
 
+export interface EventTimer {
+  active: boolean;
+  targetEndTime: number | null; // epoch ms
+  durationSeconds: number; // original duration
+  pausedRemainingSeconds?: number | null;
+  label: string;
+}
+
 export interface AppState {
   customTitle: string;
   teams: Team[];
@@ -57,4 +65,5 @@ export interface AppState {
   gallery: GalleryPhoto[];
   teamProgress: Record<string, CSIProgress>; // Keyed by string representation of team id
   notifications?: NotificationItem[];
+  timer?: EventTimer;
 }

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
 import { Camera, Image as ImageIcon, Trash2, StopCircle, Play, ArrowLeft, UploadCloud, Film } from "lucide-react";
 import { GalleryPhoto, Team } from "../types";
+import { formatRealTime, formatRelativeTime } from "../utils/time";
 
 interface CameraGalleryProps {
   userRole: "gm" | "group" | null;
@@ -385,7 +386,9 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
                   {/* Photo details on hover overlay */}
                   <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                     <p className="font-black text-xs text-white uppercase tracking-wider truncate">{photo.teamName}</p>
-                    <span className="text-[9px] font-mono text-accent-gold block mt-1 uppercase tracking-widest">{photo.timestamp}</span>
+                    <span className="text-[9px] font-mono text-accent-gold block mt-1 uppercase tracking-widest">
+                      {formatRealTime(photo.timestamp)} {formatRelativeTime(photo.timestamp) ? `• ${formatRelativeTime(photo.timestamp)}` : ""}
+                    </span>
                     
                     {/* Delete button (displays on group-hover overlay) */}
                     <button

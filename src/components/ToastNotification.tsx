@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { NotificationItem } from "../types";
 import TexasDrumstickBadge from "./TexasDrumstickBadge";
+import { formatRealTime } from "../utils/time";
 
 export interface ActiveToast {
   id: string;
@@ -145,8 +146,8 @@ export default function ToastNotification({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-gray-500">
-              {item.timestamp}
+            <span className="text-[10px] font-mono text-gray-400">
+              {formatRealTime(item.timestamp)}
             </span>
             <button
               onClick={() => onDismiss(toast.id)}
