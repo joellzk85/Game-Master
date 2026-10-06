@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { RefreshCw, Bell, Volume2, VolumeX, Megaphone, FileText, Trophy, Camera, Settings, LogOut } from "lucide-react";
+import { RefreshCw, Bell, Volume2, VolumeX, Megaphone, Trophy, Camera, Settings, LogOut } from "lucide-react";
 import { AppState, CSIProgress, NotificationItem } from "./types";
 
 import LoginScreen from "./components/LoginScreen";
@@ -429,12 +429,12 @@ export default function App() {
                   {/* Leaderboard snippet inside hub */}
                   <div className="border border-[#58585a]/20 bg-[#ffffff] p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="micro-label">Live Standings</span>
+                      <span className="micro-label">Live Standings & Scores</span>
                       <button
-                        onClick={() => navigate("leaderboard")}
+                        onClick={() => navigate("score-card")}
                         className="text-xs font-bold uppercase tracking-wider text-[#5bc09f] hover:text-[#58585a] cursor-pointer"
                       >
-                        Full Rankings →
+                        Standings & Score Card →
                       </button>
                     </div>
 
@@ -464,7 +464,7 @@ export default function App() {
                   </div>
 
                   {/* GM Action grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <button
                       onClick={() => navigate("gm-dispatch")}
                       className="p-5 border border-[#5bc09f] bg-[#5bc09f] text-[#ffffff] hover:bg-[#58585a] hover:border-[#58585a] transition-colors text-center flex flex-col items-center justify-center cursor-pointer"
@@ -478,18 +478,9 @@ export default function App() {
                       onClick={() => navigate("score-card")}
                       className="p-5 border border-[#58585a]/20 bg-[#ffffff] text-[#58585a] hover:border-[#5bc09f] hover:bg-[#5bc09f] hover:text-[#ffffff] transition-colors text-center flex flex-col items-center justify-center cursor-pointer"
                     >
-                      <FileText className="w-5 h-5 mb-2" />
-                      <span className="font-display font-bold text-xs uppercase tracking-wider">Score Card</span>
-                      <span className="text-[10px] opacity-75 mt-0.5">Adjust Points</span>
-                    </button>
-
-                    <button
-                      onClick={() => navigate("leaderboard")}
-                      className="p-5 border border-[#58585a]/20 bg-[#ffffff] text-[#58585a] hover:border-[#5bc09f] hover:bg-[#5bc09f] hover:text-[#ffffff] transition-colors text-center flex flex-col items-center justify-center cursor-pointer"
-                    >
                       <Trophy className="w-5 h-5 mb-2" />
-                      <span className="font-display font-bold text-xs uppercase tracking-wider">Standings</span>
-                      <span className="text-[10px] opacity-75 mt-0.5">Leaderboard</span>
+                      <span className="font-display font-bold text-xs uppercase tracking-wider">Standings & Score</span>
+                      <span className="text-[10px] opacity-75 mt-0.5">Rankings & Points</span>
                     </button>
 
                     <button
@@ -503,7 +494,7 @@ export default function App() {
 
                     <button
                       onClick={() => navigate("gm-settings")}
-                      className="p-5 border border-[#58585a]/20 bg-[#ffffff] text-[#58585a] hover:border-[#5bc09f] hover:bg-[#5bc09f] hover:text-[#ffffff] transition-colors text-center flex flex-col items-center justify-center cursor-pointer col-span-2 md:col-span-1"
+                      className="p-5 border border-[#58585a]/20 bg-[#ffffff] text-[#58585a] hover:border-[#5bc09f] hover:bg-[#5bc09f] hover:text-[#ffffff] transition-colors text-center flex flex-col items-center justify-center cursor-pointer"
                     >
                       <Settings className="w-5 h-5 mb-2" />
                       <span className="font-display font-bold text-xs uppercase tracking-wider">Settings</span>
@@ -548,8 +539,8 @@ export default function App() {
                 </motion.div>
               )}
 
-              {/* Score card controls page */}
-              {activePage === "score-card" && userRole === "gm" && (
+              {/* Unified Standings & Score Card page for GM */}
+              {(activePage === "score-card" || activePage === "leaderboard") && userRole === "gm" && (
                 <motion.div
                   key="score-card"
                   initial={{ opacity: 0, x: 15 }}
@@ -565,8 +556,8 @@ export default function App() {
                 </motion.div>
               )}
 
-              {/* Leaderboard page */}
-              {activePage === "leaderboard" && (
+              {/* Leaderboard page for Teams */}
+              {activePage === "leaderboard" && userRole !== "gm" && (
                 <motion.div
                   key="leaderboard"
                   initial={{ opacity: 0 }}
