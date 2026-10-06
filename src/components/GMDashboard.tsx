@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Plus, Trash2, Check, ArrowLeft, Key, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Check, ArrowLeft, Key, Image as ImageIcon, Edit3 } from "lucide-react";
 import { AppState, Team } from "../types";
 import GMDispatchPanel from "./GMDispatchPanel";
 import GMTimerControl from "./GMTimerControl";
@@ -36,6 +36,8 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
   const [success, setSuccess] = useState("");
 
   const [teamsWithPasswords, setTeamsWithPasswords] = useState<Team[]>([]);
+  const [editingNames, setEditingNames] = useState<Record<number, string>>({});
+  const [updatingTeamNameId, setUpdatingTeamNameId] = useState<number | null>(null);
   const [editingPasswords, setEditingPasswords] = useState<Record<number, string>>({});
   const [updatingTeamPwId, setUpdatingTeamPwId] = useState<number | null>(null);
   const [editingBannerTeam, setEditingBannerTeam] = useState<Team | null>(null);
@@ -61,6 +63,48 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
   useEffect(() => {
     fetchTeamsWithPasswords();
   }, [gmPassword, state.teams]);
+
+  const handleNameChangeState = (teamId: number, value: string) => {
+    setEditingNames((prev) => ({ ...prev, [teamId]: value }));
+  };
+
+  const handleUpdateTeamName = async (targetTeamId: number) => {
+    clearMessages();
+    const newName = editingNames[targetTeamId];
+    if (newName === undefined) return;
+
+    if (!newName.trim()) {
+      setError("Group name cannot be empty.");
+      return;
+    }
+
+    setUpdatingTeamNameId(targetTeamId);
+    try {
+      const res = await fetch("/api/teams/name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gmPassword,
+          teamId: targetTeamId,
+          newName: newName.trim()
+        })
+      });
+      const d = await res.json();
+      if (res.ok && d.success) {
+        setSuccess(`Group renamed to "${d.name}"!`);
+        onStateUpdated();
+        if (d.teams) {
+          setTeamsWithPasswords(d.teams);
+        }
+      } else {
+        setError(d.error || "Failed to update group name.");
+      }
+    } catch (err) {
+      setError("Network error");
+    } finally {
+      setUpdatingTeamNameId(null);
+    }
+  };
 
   const handlePasswordChangeState = (teamId: number, value: string) => {
     setEditingPasswords((prev) => ({ ...prev, [teamId]: value }));
@@ -245,7 +289,7 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
             GM Settings
           </h2>
           <p className="text-xs text-[#58585a]/70 mt-0.5">
-            Game parameters, team passcodes & management security
+            Game parameters, group names, team passcodes & management security
           </p>
         </div>
         <button
@@ -345,7 +389,7 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
       {/* Team Management */}
       <div className="border border-[#58585a]/20 bg-[#ffffff] p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <span className="micro-label">Teams & Passcodes</span>
+          <span className="micro-label">Groups, Names & Passcodes</span>
           <button
             onClick={() => setShowCreateTeam(!showCreateTeam)}
             className="flex items-center gap-1 text-xs font-bold text-[#5bc09f] uppercase tracking-wider hover:underline transition-colors cursor-pointer"
@@ -453,6 +497,8 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
         {/* Teams List */}
         <div className="space-y-3">
           {(teamsWithPasswords.length > 0 ? teamsWithPasswords : state.teams).map((team) => {
+            const currentNameValue =
+              editingNames[team.id] !== undefined ? editingNames[team.id] : team.name;
             const currentPasswordValue =
               editingPasswords[team.id] !== undefined
                 ? editingPasswords[team.id]
@@ -498,9 +544,35 @@ export default function GMDashboard({ state, gmPassword, onStateUpdated, onBack 
                   </div>
                 </div>
 
+                {/* Group Name Modifier */}
+                <div className="flex items-center gap-2 pt-2 border-t border-[#58585a]/10">
+                  <div className="flex items-center gap-1.5 text-[#58585a] w-24 shrink-0">
+                    <Edit3 className="w-3.5 h-3.5 text-[#5bc09f]" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider">Group Name:</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={currentNameValue}
+                    onChange={(e) => handleNameChangeState(team.id, e.target.value)}
+                    placeholder="Enter group name..."
+                    className="flex-1 bg-[#ffffff] border border-[#58585a]/25 px-2.5 py-1 text-xs text-[#58585a] outline-none focus:border-[#5bc09f]"
+                  />
+                  <button
+                    onClick={() => handleUpdateTeamName(team.id)}
+                    disabled={
+                      updatingTeamNameId === team.id ||
+                      !currentNameValue.trim() ||
+                      currentNameValue.trim() === team.name
+                    }
+                    className="px-3 py-1 bg-[#5bc09f] text-[#ffffff] border border-[#5bc09f] text-xs font-display font-bold uppercase tracking-wider transition-colors cursor-pointer hover:bg-[#58585a] hover:border-[#58585a] disabled:opacity-50"
+                  >
+                    {updatingTeamNameId === team.id ? "Saving..." : "Rename"}
+                  </button>
+                </div>
+
                 {/* Password / Passcode Modifier */}
                 <div className="flex items-center gap-2 pt-2 border-t border-[#58585a]/10">
-                  <div className="flex items-center gap-1.5 text-[#58585a]">
+                  <div className="flex items-center gap-1.5 text-[#58585a] w-24 shrink-0">
                     <Key className="w-3.5 h-3.5 text-[#5bc09f]" />
                     <span className="text-[10px] font-mono uppercase tracking-wider">Passcode:</span>
                   </div>

@@ -338,42 +338,6 @@ export default function CSIHunt({
               </p>
             </div>
 
-            {/* Hint block */}
-            <div className="border-t border-[#58585a]/15 pt-5">
-              {hintBought ? (
-                <div className="bg-[#5bc09f]/10 border border-[#5bc09f] p-4 space-y-1">
-                  <span className="text-[11px] uppercase font-bold tracking-wider text-[#58585a] block">
-                    Unlocked Hint
-                  </span>
-                  <p className="text-xs text-[#58585a] leading-relaxed">
-                    {activeQ.hint || "Inspect the clue surroundings closely."}
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-[#ffffff] border border-[#58585a]/20">
-                  <div className="flex items-center gap-3">
-                    <HelpCircle className="w-5 h-5 text-[#5bc09f] shrink-0" />
-                    <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#58585a] block">
-                        Need a hint?
-                      </span>
-                      <span className="text-xs text-[#58585a]/70">
-                        Unlock location guidance for this clue
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleBuyHint}
-                    disabled={hintLoading || currentTeam.score < activeQ.hintCost}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-[#ffffff] border border-[#5bc09f] text-[#58585a] hover:bg-[#5bc09f] hover:text-[#ffffff] font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-40 cursor-pointer shrink-0"
-                  >
-                    {hintLoading ? "Unlocking..." : `Buy Hint (-${activeQ.hintCost} PTS)`}
-                  </button>
-                </div>
-              )}
-            </div>
-
             {/* Evidence Submission */}
             <div className="border-t border-[#58585a]/15 pt-5 space-y-4">
               <span className="micro-label">Submit Evidence</span>

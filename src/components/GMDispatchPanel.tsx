@@ -30,13 +30,7 @@ export default function GMDispatchPanel({
       label: "10m Warning",
       type: "alert" as NotificationType,
       title: "10-Minute Warning",
-      text: "10 minutes remaining on the current round. Submit your evidence photos promptly."
-    },
-    {
-      label: "CSI Hint Tip",
-      type: "hint" as NotificationType,
-      title: "Coordinator Tip",
-      text: "Coordinator Notice: Inspect the outdoor perimeter carefully for subtle markings."
+      text: "10 minutes remaining on the current round. Submit your photos promptly."
     },
     {
       label: "Momentum Update",
@@ -48,7 +42,7 @@ export default function GMDispatchPanel({
       label: "Bonus Challenge",
       type: "broadcast" as NotificationType,
       title: "Flash Bonus Challenge",
-      text: "The next team to upload a verified clue photo will receive a +50 PTS speed bonus."
+      text: "The next team to complete the active challenge will receive a +50 PTS speed bonus."
     }
   ];
 
@@ -177,11 +171,10 @@ export default function GMDispatchPanel({
             <label className="text-[11px] uppercase tracking-wider text-[#58585a] block mb-1.5 font-bold">
               Transmission Priority
             </label>
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-3 gap-1.5">
               {[
                 { type: "broadcast" as NotificationType, label: "Notice", icon: <Megaphone className="w-3.5 h-3.5" /> },
                 { type: "alert" as NotificationType, label: "Alert", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
-                { type: "hint" as NotificationType, label: "Clue", icon: <Lightbulb className="w-3.5 h-3.5" /> },
                 { type: "praise" as NotificationType, label: "Cheer", icon: <Sparkles className="w-3.5 h-3.5" /> }
               ].map((item) => (
                 <button
@@ -207,7 +200,7 @@ export default function GMDispatchPanel({
           <span className="text-[11px] uppercase tracking-wider text-[#58585a] block mb-1.5 font-bold">
             Quick Templates
           </span>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {quickTemplates.map((tmpl) => (
               <button
                 type="button"
@@ -230,7 +223,7 @@ export default function GMDispatchPanel({
             type="text"
             value={customTitle}
             onChange={(e) => setCustomTitle(e.target.value)}
-            placeholder="e.g. FLASH DIRECTIVE / HINT UPDATE"
+            placeholder="e.g. FLASH DIRECTIVE / ROUND UPDATE"
             className="w-full bg-[#ffffff] border border-[#58585a]/30 px-3.5 py-2.5 text-xs font-mono uppercase tracking-wider outline-none focus:border-[#5bc09f] text-[#58585a]"
           />
         </div>

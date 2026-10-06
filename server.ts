@@ -393,7 +393,7 @@ async function startServer() {
 
   // Event Round Countdown Timer Control (GM ONLY)
   app.post("/api/timer/control", checkGM, (req, res) => {
-    const { action, durationMinutes, label } = req.body;
+    const { action, durationMinutes, durationSeconds, addMinutes, addSeconds, label } = req.body;
 
     if (!state.timer) {
       state.timer = {
@@ -406,14 +406,35 @@ async function startServer() {
     }
 
     const now = Date.now();
+    const requestedSec =
+      durationSeconds !== undefined && Number(durationSeconds) > 0
+        ? Math.round(Number(durationSeconds))
+        : durationMinutes !== undefined && Number(durationMinutes) > 0
+        ? Math.round(Number(durationMinutes) * 60)
+        : null;
 
-    if (action === "start") {
-      const durationSec = durationMinutes ? Number(durationMinutes) * 60 : state.timer.durationSeconds || 1800;
+    if (action === "set") {
+      const durationSec = requestedSec || state.timer.durationSeconds || 1800;
+      state.timer.durationSeconds = durationSec;
+      if (state.timer.active) {
+        state.timer.targetEndTime = now + durationSec * 1000;
+        state.timer.pausedRemainingSeconds = null;
+      } else {
+        state.timer.targetEndTime = null;
+        state.timer.pausedRemainingSeconds = null;
+      }
+      if (label !== undefined && String(label).trim()) {
+        state.timer.label = String(label).trim();
+      }
+    } else if (action === "start") {
+      const durationSec = requestedSec || state.timer.durationSeconds || 1800;
       state.timer.durationSeconds = durationSec;
       state.timer.targetEndTime = now + durationSec * 1000;
       state.timer.active = true;
       state.timer.pausedRemainingSeconds = null;
-      if (label && label.trim()) state.timer.label = label.trim();
+      if (label !== undefined && String(label).trim()) {
+        state.timer.label = String(label).trim();
+      }
     } else if (action === "pause") {
       if (state.timer.active && state.timer.targetEndTime) {
         state.timer.pausedRemainingSeconds = Math.max(0, Math.round((state.timer.targetEndTime - now) / 1000));
@@ -421,27 +442,33 @@ async function startServer() {
         state.timer.targetEndTime = null;
       }
     } else if (action === "resume") {
-      const remainingSec = state.timer.pausedRemainingSeconds || state.timer.durationSeconds || 1800;
+      const remainingSec = state.timer.pausedRemainingSeconds ?? state.timer.durationSeconds ?? 1800;
       state.timer.targetEndTime = now + remainingSec * 1000;
       state.timer.active = true;
       state.timer.pausedRemainingSeconds = null;
     } else if (action === "extend") {
-      const addMinutes = Number(req.body.addMinutes) || 5;
+      const deltaSec =
+        addSeconds !== undefined
+          ? Math.round(Number(addSeconds))
+          : (Number(addMinutes) || 5) * 60;
+
       if (state.timer.active && state.timer.targetEndTime) {
-        state.timer.targetEndTime += addMinutes * 60 * 1000;
-        state.timer.durationSeconds += addMinutes * 60;
-      } else if (state.timer.pausedRemainingSeconds) {
-        state.timer.pausedRemainingSeconds += addMinutes * 60;
-        state.timer.durationSeconds += addMinutes * 60;
+        state.timer.targetEndTime = Math.max(now, state.timer.targetEndTime + deltaSec * 1000);
+        state.timer.durationSeconds = Math.max(60, state.timer.durationSeconds + deltaSec);
+      } else if (state.timer.pausedRemainingSeconds !== null && state.timer.pausedRemainingSeconds !== undefined) {
+        state.timer.pausedRemainingSeconds = Math.max(0, state.timer.pausedRemainingSeconds + deltaSec);
+        state.timer.durationSeconds = Math.max(60, state.timer.durationSeconds + deltaSec);
+      } else {
+        state.timer.durationSeconds = Math.max(60, (state.timer.durationSeconds || 1800) + deltaSec);
       }
     } else if (action === "reset") {
-      const durationSec = durationMinutes ? Number(durationMinutes) * 60 : 1800;
+      const durationSec = requestedSec || state.timer.durationSeconds || 1800;
       state.timer = {
         active: false,
         targetEndTime: null,
         durationSeconds: durationSec,
         pausedRemainingSeconds: null,
-        label: label ? label.trim() : (state.timer.label || "Round 1")
+        label: label && String(label).trim() ? String(label).trim() : (state.timer.label || "Round 1")
       };
     }
 
@@ -599,6 +626,57 @@ async function startServer() {
     });
 
     res.json({ success: true, banner: team.banner });
+  });
+
+  // Change Team / Group Name (Accessible by Team or GM)
+  app.post("/api/teams/name", (req, res) => {
+    const { teamId, newName, password, gmPassword } = req.body;
+    const team = state.teams.find(t => t.id === Number(teamId));
+    if (!team) {
+      return res.status(404).json({ error: "Team not found" });
+    }
+
+    const isTeamAuthed = Boolean(password && team.password === password);
+    const isGMAuthed = Boolean(gmPassword && gmPassword === state.gmPassword);
+
+    if (!isTeamAuthed && !isGMAuthed) {
+      return res.status(401).json({ error: "Access denied. Invalid credentials." });
+    }
+
+    if (!newName || typeof newName !== "string" || !newName.trim()) {
+      return res.status(400).json({ error: "Group name cannot be empty." });
+    }
+
+    const trimmedName = newName.trim();
+    const oldName = team.name;
+    team.name = trimmedName;
+
+    // Keep gallery & notification team names synced with the new group name
+    if (state.gallery) {
+      state.gallery.forEach((photo) => {
+        if (photo.teamName === oldName) {
+          photo.teamName = trimmedName;
+        }
+      });
+    }
+    if (state.notifications) {
+      state.notifications.forEach((n) => {
+        if (n.targetTeamId === team.id) {
+          n.targetTeamName = trimmedName;
+        }
+      });
+    }
+
+    saveState();
+
+    broadcastWS({
+      type: "state_update",
+      reason: "team_name_updated",
+      teamId: team.id,
+      newName: team.name
+    });
+
+    res.json({ success: true, name: team.name, teams: state.teams });
   });
 
   // Security configuration updates (GM ONLY)

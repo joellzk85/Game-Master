@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Camera, Trophy, Lock, Upload, Radio } from "lucide-react";
+import { Camera, Trophy, Lock, Upload, Radio, Edit3, Check } from "lucide-react";
 import { AppState, Team } from "../types";
 import { formatRealTime, formatRelativeTime } from "../utils/time";
 import BannerModal from "./BannerModal";
@@ -34,12 +34,63 @@ export default function TeamDashboard({
   // Banner modal state
   const [showBannerModal, setShowBannerModal] = useState(false);
 
+  // Group Name modification state
+  const [groupNameInput, setGroupNameInput] = useState(team.name);
+  const [nameError, setNameError] = useState("");
+  const [nameSuccess, setNameSuccess] = useState("");
+  const [updatingName, setUpdatingName] = useState(false);
+
+  useEffect(() => {
+    setGroupNameInput(team.name);
+  }, [team.name]);
+
   // Password modification state
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [pwError, setPwError] = useState("");
   const [pwSuccess, setPwSuccess] = useState("");
   const [updatingPw, setUpdatingPw] = useState(false);
+
+  const handleUpdateGroupName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNameError("");
+    setNameSuccess("");
+
+    if (!groupNameInput.trim()) {
+      setNameError("Group name cannot be empty.");
+      return;
+    }
+
+    const resolvedPassword =
+      teamPassword || localStorage.getItem("event_team_pass") || "";
+
+    setUpdatingName(true);
+    try {
+      const res = await fetch("/api/teams/name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teamId: team.id,
+          newName: groupNameInput.trim(),
+          password: resolvedPassword,
+          gmPassword: gmPassword || localStorage.getItem("event_gm_pass") || undefined
+        })
+      });
+
+      const d = await res.json();
+      if (res.ok && d.success) {
+        setNameSuccess("Group name updated successfully!");
+        onStateUpdated();
+        setTimeout(() => setNameSuccess(""), 3000);
+      } else {
+        setNameError(d.error || "Failed to update group name.");
+      }
+    } catch (err) {
+      setNameError("Network connection error.");
+    } finally {
+      setUpdatingName(false);
+    }
+  };
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,6 +340,42 @@ export default function TeamDashboard({
           <span className="font-display font-bold text-xs uppercase tracking-widest">Photo Gallery</span>
           <span className="text-[11px] opacity-75 mt-1">Browse & Capture</span>
         </button>
+      </div>
+
+      {/* Change Group Name Block */}
+      <div className="border border-[#58585a]/20 bg-[#ffffff] p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="micro-label">Update Group Name</span>
+          <span className="text-[11px] text-[#58585a]/70">
+            Updates live across leaderboard & portal
+          </span>
+        </div>
+
+        {nameSuccess && (
+          <p className="text-xs text-[#5bc09f] font-bold flex items-center gap-1.5">
+            <Check className="w-3.5 h-3.5" /> {nameSuccess}
+          </p>
+        )}
+        {nameError && <p className="text-xs text-[#58585a] font-bold">{nameError}</p>}
+
+        <form onSubmit={handleUpdateGroupName} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={groupNameInput}
+            onChange={(e) => setGroupNameInput(e.target.value)}
+            placeholder="Enter new group name..."
+            className="flex-1 bg-[#ffffff] border border-[#58585a]/30 px-4 py-3 text-sm text-[#58585a] outline-none focus:border-[#5bc09f] transition-colors"
+            required
+          />
+          <button
+            type="submit"
+            disabled={updatingName || !groupNameInput.trim() || groupNameInput.trim() === team.name}
+            className="px-6 py-3 bg-[#5bc09f] text-[#ffffff] hover:bg-[#58585a] border border-[#5bc09f] hover:border-[#58585a] font-display font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shrink-0"
+          >
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>{updatingName ? "Saving..." : "Save Group Name"}</span>
+          </button>
+        </form>
       </div>
 
       {/* Change Password Block */}

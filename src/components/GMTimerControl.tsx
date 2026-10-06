@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Timer, Play, Pause, RotateCcw, Plus } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Timer, Play, Pause, RotateCcw, Plus, Check } from "lucide-react";
 import { EventTimer } from "../types";
 
 interface GMTimerControlProps {
@@ -13,23 +13,74 @@ export default function GMTimerControl({
   gmPassword,
   onTimerUpdated
 }: GMTimerControlProps) {
-  const [durationMinutes, setDurationMinutes] = useState<number>(30);
-  const [label, setLabel] = useState<string>(timer?.label || "Round 1: Forensics");
+  const initialTotalSec = timer?.durationSeconds || 1800;
+  const [customHours, setCustomHours] = useState<string>(
+    String(Math.floor(initialTotalSec / 3600))
+  );
+  const [customMinutes, setCustomMinutes] = useState<string>(
+    String(Math.floor((initialTotalSec % 3600) / 60))
+  );
+  const [customSeconds, setCustomSeconds] = useState<string>(
+    String(initialTotalSec % 60)
+  );
+  const [label, setLabel] = useState<string>(timer?.label || "Round 1");
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Sync local custom fields when server timer duration changes externally
+  useEffect(() => {
+    if (timer?.durationSeconds) {
+      const total = timer.durationSeconds;
+      setCustomHours(String(Math.floor(total / 3600)));
+      setCustomMinutes(String(Math.floor((total % 3600) / 60)));
+      setCustomSeconds(String(total % 60));
+    }
+    if (timer?.label) {
+      setLabel(timer.label);
+    }
+  }, [timer?.durationSeconds, timer?.label]);
 
   const presets = [
+    { label: "5 Min", mins: 5 },
     { label: "10 Min", mins: 10 },
     { label: "15 Min", mins: 15 },
     { label: "20 Min", mins: 20 },
     { label: "30 Min", mins: 30 },
     { label: "45 Min", mins: 45 },
-    { label: "60 Min", mins: 60 }
+    { label: "60 Min", mins: 60 },
+    { label: "90 Min", mins: 90 }
   ];
 
+  const getComputedTotalSeconds = () => {
+    const h = Math.max(0, parseInt(customHours || "0", 10) || 0);
+    const m = Math.max(0, parseInt(customMinutes || "0", 10) || 0);
+    const s = Math.max(0, parseInt(customSeconds || "0", 10) || 0);
+    return h * 3600 + m * 60 + s;
+  };
+
+  const formatSummary = (totalSec: number) => {
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    const parts: string[] = [];
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0 || h === 0) parts.push(`${m}m`);
+    if (s > 0) parts.push(`${s}s`);
+    return parts.join(" ");
+  };
+
   const handleAction = async (action: string, extra?: Record<string, any>) => {
-    setLoading(true);
+    setErrorMsg("");
     setStatusMsg("");
+    const totalSec = extra?.durationSeconds ?? getComputedTotalSeconds();
+
+    if ((action === "start" || action === "set") && totalSec <= 0) {
+      setErrorMsg("Please enter a countdown duration greater than 0 seconds.");
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await fetch("/api/timer/control", {
         method: "POST",
@@ -37,25 +88,43 @@ export default function GMTimerControl({
         body: JSON.stringify({
           gmPassword,
           action,
-          durationMinutes,
+          durationSeconds: totalSec > 0 ? totalSec : undefined,
           label,
           ...extra
         })
       });
       if (res.ok) {
         onTimerUpdated();
-        setStatusMsg(`Clock ${action} command sent.`);
-        setTimeout(() => setStatusMsg(""), 3000);
+        if (action === "set") {
+          setStatusMsg(`Countdown time set to ${formatSummary(totalSec)}.`);
+        } else if (action === "start") {
+          setStatusMsg(`Countdown started for ${formatSummary(totalSec)}.`);
+        } else {
+          setStatusMsg(`Clock ${action} command applied.`);
+        }
+        setTimeout(() => setStatusMsg(""), 3500);
+      } else {
+        const d = await res.json();
+        setErrorMsg(d.error || "Failed to update countdown timer.");
       }
     } catch (err) {
       console.error("Timer action failed", err);
-      setStatusMsg("Failed to execute clock command.");
+      setErrorMsg("Failed to execute clock command.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSelectPreset = (mins: number) => {
+    const totalSec = mins * 60;
+    setCustomHours(String(Math.floor(totalSec / 3600)));
+    setCustomMinutes(String(Math.floor((totalSec % 3600) / 60)));
+    setCustomSeconds("0");
+    handleAction("set", { durationSeconds: totalSec });
+  };
+
   const isRunning = timer?.active;
+  const computedSec = getComputedTotalSeconds();
 
   return (
     <div className="p-6 border border-[#58585a]/20 bg-[#ffffff] space-y-5">
@@ -67,7 +136,7 @@ export default function GMTimerControl({
               Synchronized Round Countdown Clock
             </h3>
             <p className="text-xs text-[#58585a]/70 mt-0.5">
-              Live broadcasted clock synced across all teams
+              Set any custom countdown time synced across all teams
             </p>
           </div>
         </div>
@@ -82,8 +151,15 @@ export default function GMTimerControl({
       </div>
 
       {statusMsg && (
-        <div className="p-2.5 bg-[#5bc09f]/10 border border-[#5bc09f] text-[#58585a] text-xs font-mono font-bold">
-          {statusMsg}
+        <div className="p-2.5 bg-[#5bc09f]/10 border border-[#5bc09f] text-[#58585a] text-xs font-mono font-bold flex items-center gap-2">
+          <Check className="w-4 h-4 text-[#5bc09f] shrink-0" />
+          <span>{statusMsg}</span>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="p-2.5 bg-[#58585a]/10 border border-[#58585a] text-[#58585a] text-xs font-mono font-bold">
+          {errorMsg}
         </div>
       )}
 
@@ -101,50 +177,120 @@ export default function GMTimerControl({
         />
       </div>
 
-      {/* Preset Duration Buttons */}
+      {/* Custom Time Input (Hours, Minutes, Seconds) */}
       <div>
-        <label className="micro-label mb-2">
-          Select Duration Preset
-        </label>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-          {presets.map((p) => (
-            <button
-              key={p.mins}
-              type="button"
-              onClick={() => setDurationMinutes(p.mins)}
-              className={`py-2 px-3 text-xs font-mono font-bold uppercase transition-colors cursor-pointer border ${
-                durationMinutes === p.mins
-                  ? "bg-[#5bc09f] border-[#5bc09f] text-[#ffffff]"
-                  : "bg-[#ffffff] border-[#58585a]/25 text-[#58585a] hover:border-[#5bc09f]"
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="micro-label">
+            Custom Countdown Duration
+          </label>
+          <span className="text-xs font-mono font-bold text-[#5bc09f] tabular-nums">
+            Total: {formatSummary(computedSec)}
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-[10px] font-mono uppercase text-[#58585a]/70 mb-1">
+              Hours
+            </label>
+            <input
+              type="number"
+              min={0}
+              max={99}
+              value={customHours}
+              onChange={(e) => setCustomHours(e.target.value)}
+              className="w-full bg-[#ffffff] border border-[#58585a]/30 px-3 py-2.5 text-sm font-mono font-bold text-[#58585a] focus:outline-none focus:border-[#5bc09f] tabular-nums"
+              placeholder="0"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-mono uppercase text-[#58585a]/70 mb-1">
+              Minutes
+            </label>
+            <input
+              type="number"
+              min={0}
+              max={999}
+              value={customMinutes}
+              onChange={(e) => setCustomMinutes(e.target.value)}
+              className="w-full bg-[#ffffff] border border-[#58585a]/30 px-3 py-2.5 text-sm font-mono font-bold text-[#58585a] focus:outline-none focus:border-[#5bc09f] tabular-nums"
+              placeholder="30"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-mono uppercase text-[#58585a]/70 mb-1">
+              Seconds
+            </label>
+            <input
+              type="number"
+              min={0}
+              max={59}
+              value={customSeconds}
+              onChange={(e) => setCustomSeconds(e.target.value)}
+              className="w-full bg-[#ffffff] border border-[#58585a]/30 px-3 py-2.5 text-sm font-mono font-bold text-[#58585a] focus:outline-none focus:border-[#5bc09f] tabular-nums"
+              placeholder="0"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex flex-wrap items-center gap-3 pt-2">
+      {/* Quick Presets */}
+      <div>
+        <label className="micro-label mb-2">
+          Quick Duration Presets
+        </label>
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+          {presets.map((p) => {
+            const isSelected = computedSec === p.mins * 60;
+            return (
+              <button
+                key={p.mins}
+                type="button"
+                disabled={loading}
+                onClick={() => handleSelectPreset(p.mins)}
+                className={`py-2 px-2 text-xs font-mono font-bold uppercase transition-colors cursor-pointer border whitespace-nowrap ${
+                  isSelected
+                    ? "bg-[#5bc09f] border-[#5bc09f] text-[#ffffff]"
+                    : "bg-[#ffffff] border-[#58585a]/25 text-[#58585a] hover:border-[#5bc09f]"
+                }`}
+              >
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Primary Controls */}
+      <div className="flex flex-wrap items-center gap-2.5 pt-2">
+        <button
+          type="button"
+          onClick={() => handleAction("set")}
+          disabled={loading || computedSec <= 0}
+          className="px-4 py-3 bg-[#ffffff] hover:bg-[#58585a] text-[#58585a] hover:text-[#ffffff] border border-[#58585a]/35 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+        >
+          <Check className="w-4 h-4" />
+          <span>Set Time ({formatSummary(computedSec)})</span>
+        </button>
+
         {!isRunning ? (
           <button
             type="button"
             onClick={() => handleAction("start")}
-            disabled={loading}
-            className="flex-1 py-3 bg-[#5bc09f] hover:bg-[#58585a] text-[#ffffff] border border-[#5bc09f] hover:border-[#58585a] text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            disabled={loading || computedSec <= 0}
+            className="flex-1 py-3 px-4 bg-[#5bc09f] hover:bg-[#58585a] text-[#ffffff] border border-[#5bc09f] hover:border-[#58585a] text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Play className="w-4 h-4" />
-            Start Countdown ({durationMinutes}m)
+            <span>Start Countdown ({formatSummary(computedSec)})</span>
           </button>
         ) : (
           <button
             type="button"
             onClick={() => handleAction("pause")}
             disabled={loading}
-            className="flex-1 py-3 bg-[#58585a] hover:bg-[#5bc09f] text-[#ffffff] border border-[#58585a] hover:border-[#5bc09f] text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 py-3 px-4 bg-[#58585a] hover:bg-[#5bc09f] text-[#ffffff] border border-[#58585a] hover:border-[#5bc09f] text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Pause className="w-4 h-4" />
-            Pause Countdown
+            <span>Pause Countdown</span>
           </button>
         )}
 
@@ -152,16 +298,16 @@ export default function GMTimerControl({
           type="button"
           onClick={() => handleAction("extend", { addMinutes: 5 })}
           disabled={loading}
-          className="px-4 py-3 bg-[#ffffff] hover:bg-[#5bc09f] text-[#58585a] hover:text-[#ffffff] border border-[#58585a]/30 hover:border-[#5bc09f] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
+          className="px-3.5 py-3 bg-[#ffffff] hover:bg-[#5bc09f] text-[#58585a] hover:text-[#ffffff] border border-[#58585a]/30 hover:border-[#5bc09f] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1"
         >
-          <Plus className="w-4 h-4" /> 5 Min
+          <Plus className="w-4 h-4" /> 5m
         </button>
 
         <button
           type="button"
           onClick={() => handleAction("reset")}
           disabled={loading}
-          className="px-4 py-3 bg-[#ffffff] hover:bg-[#58585a] text-[#58585a] hover:text-[#ffffff] border border-[#58585a]/30 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
+          className="px-3.5 py-3 bg-[#ffffff] hover:bg-[#58585a] text-[#58585a] hover:text-[#ffffff] border border-[#58585a]/30 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
         >
           <RotateCcw className="w-4 h-4" /> Reset
         </button>
