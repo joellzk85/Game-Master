@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Timer, Play, Pause, RotateCcw, Plus, Clock, Sparkles } from "lucide-react";
+import { Timer, Play, Pause, RotateCcw, Plus } from "lucide-react";
 import { EventTimer } from "../types";
 
 interface GMTimerControlProps {
@@ -44,7 +44,7 @@ export default function GMTimerControl({
       });
       if (res.ok) {
         onTimerUpdated();
-        setStatusMsg(`Clock ${action} command sent successfully!`);
+        setStatusMsg(`Clock ${action} command sent.`);
         setTimeout(() => setStatusMsg(""), 3000);
       }
     } catch (err) {
@@ -58,40 +58,38 @@ export default function GMTimerControl({
   const isRunning = timer?.active;
 
   return (
-    <div className="p-6 border border-[#F9B800]/20 bg-[#1C1815] space-y-5">
-      <div className="flex items-center justify-between border-b border-[#F9B800]/20 pb-3">
+    <div className="p-6 border border-[#58585a]/20 bg-[#ffffff] space-y-5">
+      <div className="flex items-center justify-between border-b border-[#58585a]/15 pb-3">
         <div className="flex items-center gap-2.5">
-          <Timer className="w-5 h-5 text-[#F9B800]" />
+          <Timer className="w-5 h-5 text-[#5bc09f]" />
           <div>
-            <h3 className="font-display font-black text-sm uppercase tracking-wider text-white">
+            <h3 className="font-display font-bold text-sm uppercase tracking-wider text-[#58585a]">
               Synchronized Round Countdown Clock
             </h3>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">
-              Live broadcasted tournament clock synced to real time across all teams
+            <p className="text-xs text-[#58585a]/70 mt-0.5">
+              Live broadcasted clock synced across all teams
             </p>
           </div>
         </div>
 
         <span
-          className={`text-[10px] font-mono px-2 py-0.5 font-black uppercase border ${
-            isRunning
-              ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 animate-pulse"
-              : "bg-gray-800 text-gray-400 border-gray-700"
+          className={`text-[10px] font-mono font-bold uppercase ${
+            isRunning ? "text-[#5bc09f]" : "text-[#58585a]/60"
           }`}
         >
-          {isRunning ? "● CLOCK RUNNING" : "CLOCK IDLE"}
+          {isRunning ? "● RUNNING" : "○ IDLE"}
         </span>
       </div>
 
       {statusMsg && (
-        <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+        <div className="p-2.5 bg-[#5bc09f]/10 border border-[#5bc09f] text-[#58585a] text-xs font-mono font-bold">
           {statusMsg}
         </div>
       )}
 
       {/* Round Name Input */}
       <div>
-        <label className="block text-[10px] uppercase font-black tracking-widest text-[#F9B800] mb-1.5">
+        <label className="micro-label mb-1.5">
           Round / Event Name
         </label>
         <input
@@ -99,13 +97,13 @@ export default function GMTimerControl({
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder="e.g. Round 1: Crime Scene Forensics"
-          className="w-full bg-[#14110F] border border-[#F9B800]/30 px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-[#F9B800]"
+          className="w-full bg-[#ffffff] border border-[#58585a]/30 px-3 py-2 text-sm text-[#58585a] font-mono focus:outline-none focus:border-[#5bc09f]"
         />
       </div>
 
       {/* Preset Duration Buttons */}
       <div>
-        <label className="block text-[10px] uppercase font-black tracking-widest text-gray-400 mb-2">
+        <label className="micro-label mb-2">
           Select Duration Preset
         </label>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -114,10 +112,10 @@ export default function GMTimerControl({
               key={p.mins}
               type="button"
               onClick={() => setDurationMinutes(p.mins)}
-              className={`py-2 px-3 text-xs font-mono font-bold uppercase transition-all cursor-pointer border ${
+              className={`py-2 px-3 text-xs font-mono font-bold uppercase transition-colors cursor-pointer border ${
                 durationMinutes === p.mins
-                  ? "bg-[#BE2403] border-[#F9B800] text-white shadow-sm"
-                  : "bg-[#14110F] border-white/10 text-gray-300 hover:border-white/40"
+                  ? "bg-[#5bc09f] border-[#5bc09f] text-[#ffffff]"
+                  : "bg-[#ffffff] border-[#58585a]/25 text-[#58585a] hover:border-[#5bc09f]"
               }`}
             >
               {p.label}
@@ -133,17 +131,17 @@ export default function GMTimerControl({
             type="button"
             onClick={() => handleAction("start")}
             disabled={loading}
-            className="flex-1 py-3 bg-[#BE2403] hover:bg-[#8F1A02] text-white border border-[#F9B800] text-xs font-black uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+            className="flex-1 py-3 bg-[#5bc09f] hover:bg-[#58585a] text-[#ffffff] border border-[#5bc09f] hover:border-[#58585a] text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            <Play className="w-4 h-4 fill-white" />
-            Start Synchronized Countdown ({durationMinutes}m)
+            <Play className="w-4 h-4" />
+            Start Countdown ({durationMinutes}m)
           </button>
         ) : (
           <button
             type="button"
             onClick={() => handleAction("pause")}
             disabled={loading}
-            className="flex-1 py-3 bg-amber-600 hover:bg-amber-700 text-white border border-amber-400 text-xs font-black uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+            className="flex-1 py-3 bg-[#58585a] hover:bg-[#5bc09f] text-[#ffffff] border border-[#58585a] hover:border-[#5bc09f] text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Pause className="w-4 h-4" />
             Pause Countdown
@@ -154,7 +152,7 @@ export default function GMTimerControl({
           type="button"
           onClick={() => handleAction("extend", { addMinutes: 5 })}
           disabled={loading}
-          className="px-4 py-3 bg-[#14110F] hover:bg-[#BE2403] text-[#F9B800] hover:text-white border border-[#F9B800]/40 text-xs font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-1.5"
+          className="px-4 py-3 bg-[#ffffff] hover:bg-[#5bc09f] text-[#58585a] hover:text-[#ffffff] border border-[#58585a]/30 hover:border-[#5bc09f] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" /> 5 Min
         </button>
@@ -163,7 +161,7 @@ export default function GMTimerControl({
           type="button"
           onClick={() => handleAction("reset")}
           disabled={loading}
-          className="px-4 py-3 bg-[#14110F] hover:bg-gray-800 text-gray-400 hover:text-white border border-gray-700 text-xs font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-1.5"
+          className="px-4 py-3 bg-[#ffffff] hover:bg-[#58585a] text-[#58585a] hover:text-[#ffffff] border border-[#58585a]/30 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
         >
           <RotateCcw className="w-4 h-4" /> Reset
         </button>

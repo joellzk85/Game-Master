@@ -1,8 +1,7 @@
 import React, { useState, useRef } from "react";
-import { X, Upload, Image as ImageIcon, Sparkles, Check, AlertCircle, Link, RefreshCw } from "lucide-react";
+import { X, Upload, Image as ImageIcon, Check, AlertCircle, Link, RefreshCw } from "lucide-react";
 import { Team } from "../types";
 import { compressBannerImage } from "../utils/imageCompressor";
-import TexasDrumstickBadge from "./TexasDrumstickBadge";
 
 interface BannerModalProps {
   isOpen: boolean;
@@ -15,40 +14,28 @@ interface BannerModalProps {
 
 const PRESET_BANNERS = [
   {
-    id: "spicy-fire",
-    name: "Spicy Fire Blaze",
-    url: "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&auto=format&fit=crop&q=80",
-    theme: "Texas Spicy Red"
+    id: "mint-geometric",
+    name: "Mint Clean Slate",
+    url: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'><rect width='1200' height='400' fill='%235bc09f'/><circle cx='1050' cy='80' r='220' fill='%23ffffff' fill-opacity='0.12'/><circle cx='200' cy='360' r='180' fill='%2358585a' fill-opacity='0.12'/></svg>",
+    theme: "Primary Accent"
   },
   {
-    id: "golden-crunch",
-    name: "Golden Crunch Championship",
-    url: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&auto=format&fit=crop&q=80",
-    theme: "Gold Trophy"
+    id: "slate-minimal",
+    name: "Slate Minimalist",
+    url: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'><rect width='1200' height='400' fill='%2358585a'/><rect x='750' y='-100' width='350' height='600' transform='rotate(18 750 200)' fill='%235bc09f' fill-opacity='0.25'/></svg>",
+    theme: "Charcoal Slate"
   },
   {
-    id: "neon-cyber",
-    name: "Cyber Neon Circuit",
-    url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&auto=format&fit=crop&q=80",
-    theme: "High Tech Hunt"
+    id: "duo-diagonal",
+    name: "Dual Split Horizon",
+    url: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'><rect width='1200' height='400' fill='%2358585a'/><polygon points='0,0 720,0 480,400 0,400' fill='%235bc09f'/></svg>",
+    theme: "Mint & Slate"
   },
   {
-    id: "midnight-stars",
-    name: "Midnight Bold Stars",
-    url: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=1200&auto=format&fit=crop&q=80",
-    theme: "Night Sky"
-  },
-  {
-    id: "emerald-speed",
-    name: "Emerald Velocity",
-    url: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1200&auto=format&fit=crop&q=80",
-    theme: "Green Turbo"
-  },
-  {
-    id: "blue-horizon",
-    name: "Cobalt Horizon",
-    url: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200&auto=format&fit=crop&q=80",
-    theme: "Royal Blue"
+    id: "grid-matrix",
+    name: "Architectural Grid",
+    url: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'><rect width='1200' height='400' fill='%2343967b'/><line x1='0' y1='100' x2='1200' y2='100' stroke='%23ffffff' stroke-opacity='0.15' stroke-width='2'/><line x1='0' y1='200' x2='1200' y2='200' stroke='%23ffffff' stroke-opacity='0.15' stroke-width='2'/><line x1='0' y1='300' x2='1200' y2='300' stroke='%23ffffff' stroke-opacity='0.15' stroke-width='2'/><line x1='300' y1='0' x2='300' y2='400' stroke='%23ffffff' stroke-opacity='0.15' stroke-width='2'/><line x1='600' y1='0' x2='600' y2='400' stroke='%23ffffff' stroke-opacity='0.15' stroke-width='2'/><line x1='900' y1='0' x2='900' y2='400' stroke='%23ffffff' stroke-opacity='0.15' stroke-width='2'/></svg>",
+    theme: "Clean Structure"
   }
 ];
 
@@ -119,7 +106,6 @@ export default function BannerModal({
     setErrorMsg("");
     setSuccessMsg("");
 
-    // Resolve credentials
     const resolvedPassword =
       teamPassword ||
       localStorage.getItem("event_team_pass") ||
@@ -144,7 +130,7 @@ export default function BannerModal({
         onBannerUpdated();
         setTimeout(() => {
           onClose();
-        }, 1200);
+        }, 900);
       } else {
         setErrorMsg(data.error || "Failed to update banner. Please check credentials.");
       }
@@ -156,24 +142,21 @@ export default function BannerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-[#1C1815] border border-[#F9B800]/50 w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div className="bg-[#ffffff] border border-[#58585a]/30 w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#F9B800]/20 bg-[#14110F]">
-          <div className="flex items-center gap-2.5">
-            <TexasDrumstickBadge size="xs" />
-            <div>
-              <h3 className="font-display font-black text-sm uppercase tracking-wider text-white">
-                Customize Team Card Art & Banner
-              </h3>
-              <p className="text-[10px] text-gray-400 font-mono uppercase">
-                {team.name} • Texas Chicken Championship
-              </p>
-            </div>
+        <div className="flex items-center justify-between p-4 border-b border-[#58585a]/20 bg-[#ffffff]">
+          <div>
+            <h3 className="font-display font-bold text-sm uppercase tracking-wider text-[#58585a]">
+              Customize Team Banner
+            </h3>
+            <p className="text-xs text-[#58585a]/70 mt-0.5">
+              {team.name}
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-1.5 text-[#58585a]/70 hover:text-[#58585a] hover:bg-[#58585a]/10 transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -184,77 +167,70 @@ export default function BannerModal({
         <div className="p-5 space-y-4">
           {/* Live Preview Card */}
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-[#F9B800] mb-1.5">
+            <label className="micro-label mb-1.5">
               Live Banner Preview
             </label>
-            <div className="relative h-40 w-full overflow-hidden border border-[#F9B800]/40 bg-[#14110F]">
+            <div className="relative h-40 w-full overflow-hidden border border-[#58585a]/25 bg-[#58585a]/10">
               <div
                 className="w-full h-full bg-cover bg-center transition-all duration-300"
-                style={{ backgroundImage: `url('${selectedBanner}')` }}
+                style={{ backgroundImage: `url("${selectedBanner}")` }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1C1815] via-[#1C1815]/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
               <div className="absolute bottom-3 left-4">
-                <h4
-                  className="font-display font-black text-xl uppercase tracking-tight"
-                  style={{ color: team.color }}
-                >
+                <h4 className="font-display font-bold text-xl uppercase tracking-tight text-[#ffffff]">
                   {team.name}
                 </h4>
-                <p className="text-[9px] text-gray-300 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
-                  <Sparkles className="w-3 h-3 text-[#F9B800]" />
-                  <span>Championship Contender</span>
-                </p>
               </div>
             </div>
             {compressionInfo && (
-              <p className="text-[10px] font-mono text-emerald-400 mt-1 flex items-center gap-1">
-                <Check className="w-3 h-3" /> {compressionInfo}
+              <p className="text-xs font-mono text-[#5bc09f] mt-1.5 flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" /> {compressionInfo}
               </p>
             )}
           </div>
 
           {/* Feedback Messages */}
           {errorMsg && (
-            <div className="p-3 bg-[#BE2403]/20 border border-[#BE2403] text-red-200 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-[#FF4A3D]" />
+            <div className="p-3 bg-[#58585a]/10 border border-[#58585a] text-[#58585a] text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
           {successMsg && (
-            <div className="p-3 bg-emerald-950/40 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-2">
-              <Check className="w-4 h-4 shrink-0 text-emerald-400" />
+            <div className="p-3 bg-[#5bc09f]/15 border border-[#5bc09f] text-[#58585a] text-xs font-bold flex items-center gap-2">
+              <Check className="w-4 h-4 shrink-0 text-[#5bc09f]" />
               <span>{successMsg}</span>
             </div>
           )}
 
           {/* Navigation Tabs */}
-          <div className="flex border-b border-[#F9B800]/20">
+          <div className="flex border-b border-[#58585a]/20">
             <button
               onClick={() => setActiveTab("upload")}
-              className={`flex-1 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer border-b-2 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer border-b-2 flex items-center justify-center gap-1.5 ${
                 activeTab === "upload"
-                  ? "border-[#BE2403] text-white bg-[#BE2403]/10"
-                  : "border-transparent text-gray-400 hover:text-white"
+                  ? "border-[#5bc09f] text-[#58585a] bg-[#5bc09f]/5"
+                  : "border-transparent text-[#58585a]/60 hover:text-[#58585a]"
               }`}
             >
               <Upload className="w-3.5 h-3.5" /> Upload File
             </button>
             <button
               onClick={() => setActiveTab("presets")}
-              className={`flex-1 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer border-b-2 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer border-b-2 flex items-center justify-center gap-1.5 ${
                 activeTab === "presets"
-                  ? "border-[#BE2403] text-white bg-[#BE2403]/10"
-                  : "border-transparent text-gray-400 hover:text-white"
+                  ? "border-[#5bc09f] text-[#58585a] bg-[#5bc09f]/5"
+                  : "border-transparent text-[#58585a]/60 hover:text-[#58585a]"
               }`}
             >
-              <ImageIcon className="w-3.5 h-3.5" /> Preset Themes
+              <ImageIcon className="w-3.5 h-3.5" /> Clean Presets
             </button>
             <button
               onClick={() => setActiveTab("url")}
-              className={`flex-1 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer border-b-2 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer border-b-2 flex items-center justify-center gap-1.5 ${
                 activeTab === "url"
-                  ? "border-[#BE2403] text-white bg-[#BE2403]/10"
-                  : "border-transparent text-gray-400 hover:text-white"
+                  ? "border-[#5bc09f] text-[#58585a] bg-[#5bc09f]/5"
+                  : "border-transparent text-[#58585a]/60 hover:text-[#58585a]"
               }`}
             >
               <Link className="w-3.5 h-3.5" /> Direct URL
@@ -273,14 +249,14 @@ export default function BannerModal({
               />
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[#F9B800]/30 hover:border-[#F9B800] bg-[#14110F] p-6 text-center cursor-pointer transition-all group"
+                className="border border-dashed border-[#58585a]/35 hover:border-[#5bc09f] bg-[#ffffff] p-6 text-center cursor-pointer transition-colors group"
               >
-                <Upload className="w-8 h-8 text-[#F9B800] mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <p className="text-xs font-black uppercase tracking-wider text-white">
-                  Tap to select an image from your device
+                <Upload className="w-7 h-7 text-[#5bc09f] mx-auto mb-2" />
+                <p className="text-xs font-bold uppercase tracking-wider text-[#58585a]">
+                  Select an image from your device
                 </p>
-                <p className="text-[10px] text-gray-400 font-mono mt-1">
-                  Supports JPG, PNG, WEBP • Automatically optimized for instant loading
+                <p className="text-[11px] text-[#58585a]/70 mt-1">
+                  Supports JPG, PNG, WEBP · Automatically optimized for instant loading
                 </p>
               </div>
             </div>
@@ -288,7 +264,7 @@ export default function BannerModal({
 
           {/* Tab 2: Presets */}
           {activeTab === "presets" && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-1">
+            <div className="grid grid-cols-2 gap-3 p-1">
               {PRESET_BANNERS.map((preset) => {
                 const isCurrent = selectedBanner === preset.url;
                 return (
@@ -298,30 +274,25 @@ export default function BannerModal({
                       setSelectedBanner(preset.url);
                       setCompressionInfo(`Selected preset: ${preset.name}`);
                     }}
-                    className={`relative h-20 overflow-hidden border text-left cursor-pointer transition-all group ${
+                    className={`relative h-20 overflow-hidden border text-left cursor-pointer transition-all ${
                       isCurrent
-                        ? "border-[#F9B800] ring-2 ring-[#F9B800]/60 scale-[1.02]"
-                        : "border-white/10 hover:border-white/40 opacity-80 hover:opacity-100"
+                        ? "border-[#5bc09f] ring-2 ring-[#5bc09f]/40"
+                        : "border-[#58585a]/20 hover:border-[#5bc09f]"
                     }`}
                   >
                     <div
-                      className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
-                      style={{ backgroundImage: `url('${preset.url}')` }}
+                      className="w-full h-full bg-cover bg-center"
+                      style={{ backgroundImage: `url("${preset.url}")` }}
                     />
-                    <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors" />
-                    <div className="absolute bottom-1.5 left-2 right-2">
-                      <p className="text-[10px] font-black text-white uppercase tracking-wider truncate">
+                    <div className="absolute inset-0 bg-black/35" />
+                    <div className="absolute bottom-2 left-2.5 right-2.5">
+                      <p className="text-xs font-bold text-[#ffffff] uppercase tracking-wider truncate">
                         {preset.name}
                       </p>
-                      <p className="text-[8px] font-mono text-[#F9B800] uppercase">
+                      <p className="text-[10px] text-[#ffffff]/80">
                         {preset.theme}
                       </p>
                     </div>
-                    {isCurrent && (
-                      <div className="absolute top-1 right-1 w-4 h-4 bg-[#F9B800] text-black flex items-center justify-center rounded-full">
-                        <Check className="w-2.5 h-2.5 stroke-[3]" />
-                      </div>
-                    )}
                   </button>
                 );
               })}
@@ -331,21 +302,21 @@ export default function BannerModal({
           {/* Tab 3: Direct URL */}
           {activeTab === "url" && (
             <div className="space-y-2">
-              <label className="text-[10px] uppercase font-black tracking-widest text-gray-400">
-                Paste Image Web Address
+              <label className="micro-label">
+                Image Web Address
               </label>
               <div className="flex gap-2">
                 <input
                   type="url"
-                  placeholder="https://images.unsplash.com/..."
+                  placeholder="https://..."
                   value={urlInput}
                   onChange={(e) => setUrlInput(e.target.value)}
-                  className="flex-1 bg-[#14110F] border border-[#F9B800]/30 px-3 py-2 text-xs font-mono text-white outline-none focus:border-[#F9B800]"
+                  className="flex-1 bg-[#ffffff] border border-[#58585a]/30 px-3 py-2 text-xs font-mono text-[#58585a] outline-none focus:border-[#5bc09f]"
                 />
                 <button
                   type="button"
                   onClick={handleApplyUrl}
-                  className="px-4 py-2 bg-[#F9B800] text-black hover:bg-[#BE2403] hover:text-white text-xs font-black uppercase tracking-wider transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-[#5bc09f] text-[#ffffff] hover:bg-[#58585a] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                 >
                   Preview
                 </button>
@@ -355,18 +326,18 @@ export default function BannerModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-2.5 p-4 border-t border-[#F9B800]/20 bg-[#14110F]">
+        <div className="flex items-center justify-end gap-2.5 p-4 border-t border-[#58585a]/20 bg-[#ffffff]">
           <button
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 border border-white/20 text-gray-300 hover:text-white hover:border-white/40 text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            className="px-4 py-2 border border-[#58585a]/25 text-[#58585a] hover:bg-[#58585a] hover:text-[#ffffff] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSaveBanner}
             disabled={loading}
-            className="px-5 py-2.5 bg-[#BE2403] hover:bg-[#8F1A02] text-white border border-[#F9B800] text-xs font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-1.5 shadow-lg disabled:opacity-50"
+            className="px-5 py-2 bg-[#5bc09f] hover:bg-[#58585a] text-[#ffffff] border border-[#5bc09f] hover:border-[#58585a] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
           >
             {loading ? (
               <>

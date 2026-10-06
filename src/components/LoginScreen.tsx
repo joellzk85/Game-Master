@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { ShieldAlert, Users, Lock, Key, ChevronRight, ArrowLeft, Trophy } from "lucide-react";
+import { ShieldAlert, Users, Lock, Key, ChevronRight, ArrowLeft } from "lucide-react";
 import { Team } from "../types";
-import TexasDrumstickBadge from "./TexasDrumstickBadge";
 
 interface LoginScreenProps {
   teams: Team[];
@@ -40,7 +39,11 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
 
       const data = await res.json();
       if (res.ok && data.success) {
-        onLoginSuccess(view === "gm" ? "gm" : "group", password, view === "team" ? Number(selectedTeamId) : undefined);
+        onLoginSuccess(
+          view === "gm" ? "gm" : "group",
+          password,
+          view === "team" ? Number(selectedTeamId) : undefined
+        );
       } else {
         setError(data.error || "Login failed. Please verify credentials.");
       }
@@ -58,168 +61,153 @@ export default function LoginScreen({ teams, onLoginSuccess }: LoginScreenProps)
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#1C1815]/95 border border-[#F9B800]/30 shadow-2xl p-8 relative overflow-hidden">
-        
-        {/* Subtle warm glow ornament */}
-        <div className="absolute -top-32 -left-32 w-72 h-72 bg-[#BE2403]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-72 h-72 bg-[#F9B800]/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10">
-          <div className="flex justify-center mb-5">
-            {/* Texas Chicken Fried Drumstick Logo Emblem */}
-            <TexasDrumstickBadge size="xl" className="shadow-2xl shadow-[#BE2403]/60 ring-4 ring-[#BE2403]/50" />
-          </div>
-
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-[#BE2403] text-white text-[9px] font-black uppercase tracking-widest mb-2 border border-[#F9B800]/40 shadow-sm">
-              <TexasDrumstickBadge size="xs" showBorder={false} />
-              <span>TEXAS CHICKEN MALAYSIA</span>
-            </div>
-            <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-white uppercase leading-none">
-              CHAMPIONSHIP <span className="text-[#F9B800]">PORTAL</span>
-            </h1>
-            <p className="text-[10px] text-gray-400 uppercase tracking-[0.15em] font-bold mt-2">
-              BOLD FLAVOR • BIG CHALLENGE • LEGENDARY TEAMS
-            </p>
-          </div>
-
-          {view === "select" && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
-              id="role-selection"
-            >
-              <button
-                onClick={() => selectRole("gm")}
-                className="w-full flex items-center gap-4 p-5 bg-[#14110F] hover:bg-[#25201C] border border-[#F9B800]/20 hover:border-[#F9B800] transition-all duration-300 group cursor-pointer text-left shadow-md"
-                id="select-gm-btn"
-              >
-                <div className="w-12 h-12 bg-[#BE2403]/20 border border-[#BE2403]/40 group-hover:bg-[#BE2403] flex items-center justify-center text-[#F9B800] group-hover:text-white transition-colors shrink-0">
-                  <ShieldAlert className="w-5 h-5" />
-                </div>
-                <div className="flex-grow">
-                  <div className="font-display font-black text-sm uppercase tracking-wider text-white group-hover:text-[#F9B800] transition-colors">
-                    Game Master HQ
-                  </div>
-                  <div className="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">
-                    Live scoring, game controls & passwords
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-[#F9B800] group-hover:translate-x-1 transition-all shrink-0" />
-              </button>
-
-              <button
-                onClick={() => selectRole("team")}
-                className="w-full flex items-center gap-4 p-5 bg-[#14110F] hover:bg-[#25201C] border border-[#F9B800]/20 hover:border-[#F9B800] transition-all duration-300 group cursor-pointer text-left shadow-md"
-                id="select-team-btn"
-              >
-                <div className="w-12 h-12 bg-[#F9B800]/20 border border-[#F9B800]/40 group-hover:bg-[#F9B800] flex items-center justify-center text-[#F9B800] group-hover:text-[#120F0D] transition-colors shrink-0">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div className="flex-grow">
-                  <div className="font-display font-black text-sm uppercase tracking-wider text-white group-hover:text-[#F9B800] transition-colors">
-                    Team Participant Portal
-                  </div>
-                  <div className="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">
-                    View standing, photos & forensic CSI hunt
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-[#F9B800] group-hover:translate-x-1 transition-all shrink-0" />
-              </button>
-            </motion.div>
-          )}
-
-          {view !== "select" && (
-            <motion.form
-              initial={{ opacity: 0, x: view === "gm" ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              onSubmit={handleLogin}
-              className="space-y-5"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <button
-                  type="button"
-                  onClick={() => setView("select")}
-                  className="p-1.5 bg-[#14110F] hover:bg-[#BE2403] border border-[#F9B800]/30 text-white transition-colors cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#F9B800]">
-                  {view === "gm" ? "🍗 GM Administration Access" : "🍗 Team Player Sign-In"}
-                </span>
-              </div>
-
-              {view === "team" && (
-                <div className="space-y-1.5" id="team-dropdown-group">
-                  <label className="micro-label">Select Your Team</label>
-                  <select
-                    value={selectedTeamId}
-                    onChange={(e) => setSelectedTeamId(e.target.value)}
-                    className="w-full bg-[#14110F] border border-[#F9B800]/30 px-4 py-3.5 text-sm text-white outline-none focus:border-[#F9B800] transition-colors cursor-pointer font-mono"
-                    required
-                  >
-                    <option value="">-- Choose team --</option>
-                    {teams.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <label className="micro-label">
-                  {view === "gm" ? "GM Security Password" : "Team Passcode"}
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-3.5 text-[#F9B800]">
-                    <Key className="w-4 h-4" />
-                  </span>
-                  <input
-                    type="password"
-                    placeholder={view === "gm" ? "Enter administrative passcode..." : "Enter team passcode..."}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#14110F] border border-[#F9B800]/30 pl-11 pr-4 py-3.5 text-sm text-white outline-none focus:border-[#F9B800] transition-colors font-mono"
-                    required
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-xs text-red-300 font-bold bg-[#BE2403]/30 border border-[#BE2403] p-3 flex items-center gap-2"
-                  id="login-error-message"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
-                  <span>{error}</span>
-                </motion.div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 bg-[#F9B800] text-[#120F0D] hover:bg-[#BE2403] hover:text-white border border-[#F9B800] hover:border-[#BE2403] font-display font-black text-sm uppercase tracking-[0.2em] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                id="submit-login-btn"
-              >
-                {loading ? (
-                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    <span>Enter Championship</span>
-                  </>
-                )}
-              </button>
-            </motion.form>
-          )}
+    <div className="min-h-[75vh] flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-[#ffffff] border border-[#58585a]/25 p-8">
+        <div className="text-center mb-8">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-[#5bc09f] block mb-2">
+            Event Access
+          </span>
+          <h1 className="font-display font-bold text-2xl sm:text-3xl tracking-tight text-[#58585a] uppercase">
+            Team Portal
+          </h1>
+          <p className="text-xs text-[#58585a]/75 mt-2">
+            Select your access role to continue
+          </p>
         </div>
+
+        {view === "select" && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="space-y-4"
+            id="role-selection"
+          >
+            <button
+              onClick={() => selectRole("gm")}
+              className="w-full flex items-center gap-4 p-5 bg-[#ffffff] hover:bg-[#5bc09f]/5 border border-[#58585a]/20 hover:border-[#5bc09f] transition-colors group cursor-pointer text-left"
+              id="select-gm-btn"
+            >
+              <div className="w-11 h-11 bg-[#5bc09f]/10 border border-[#5bc09f]/40 group-hover:bg-[#5bc09f] flex items-center justify-center text-[#5bc09f] group-hover:text-[#ffffff] transition-colors shrink-0">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div className="flex-grow">
+                <div className="font-display font-bold text-sm uppercase tracking-wider text-[#58585a]">
+                  Game Master Console
+                </div>
+                <div className="text-xs text-[#58585a]/70 mt-0.5">
+                  Live scoring, game controls & team management
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-[#58585a]/60 group-hover:text-[#5bc09f] group-hover:translate-x-0.5 transition-all shrink-0" />
+            </button>
+
+            <button
+              onClick={() => selectRole("team")}
+              className="w-full flex items-center gap-4 p-5 bg-[#ffffff] hover:bg-[#5bc09f]/5 border border-[#58585a]/20 hover:border-[#5bc09f] transition-colors group cursor-pointer text-left"
+              id="select-team-btn"
+            >
+              <div className="w-11 h-11 bg-[#5bc09f]/10 border border-[#5bc09f]/40 group-hover:bg-[#5bc09f] flex items-center justify-center text-[#5bc09f] group-hover:text-[#ffffff] transition-colors shrink-0">
+                <Users className="w-5 h-5" />
+              </div>
+              <div className="flex-grow">
+                <div className="font-display font-bold text-sm uppercase tracking-wider text-[#58585a]">
+                  Team Participant Portal
+                </div>
+                <div className="text-xs text-[#58585a]/70 mt-0.5">
+                  View standings, gallery & active challenges
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-[#58585a]/60 group-hover:text-[#5bc09f] group-hover:translate-x-0.5 transition-all shrink-0" />
+            </button>
+          </motion.div>
+        )}
+
+        {view !== "select" && (
+          <motion.form
+            initial={{ opacity: 0, x: view === "gm" ? -15 : 15 }}
+            animate={{ opacity: 1, x: 0 }}
+            onSubmit={handleLogin}
+            className="space-y-5"
+          >
+            <div className="flex items-center gap-2.5 mb-2">
+              <button
+                type="button"
+                onClick={() => setView("select")}
+                className="p-1.5 bg-[#ffffff] hover:bg-[#5bc09f] border border-[#58585a]/25 hover:border-[#5bc09f] text-[#58585a] hover:text-[#ffffff] transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#58585a]">
+                {view === "gm" ? "GM Administration Sign-In" : "Team Sign-In"}
+              </span>
+            </div>
+
+            {view === "team" && (
+              <div className="space-y-1.5" id="team-dropdown-group">
+                <label className="micro-label">Select Your Team</label>
+                <select
+                  value={selectedTeamId}
+                  onChange={(e) => setSelectedTeamId(e.target.value)}
+                  className="w-full bg-[#ffffff] border border-[#58585a]/30 px-4 py-3 text-sm text-[#58585a] outline-none focus:border-[#5bc09f] transition-colors cursor-pointer"
+                  required
+                >
+                  <option value="">-- Choose team --</option>
+                  {teams.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="micro-label">
+                {view === "gm" ? "GM Security Password" : "Team Passcode"}
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-3.5 text-[#5bc09f]">
+                  <Key className="w-4 h-4" />
+                </span>
+                <input
+                  type="password"
+                  placeholder={view === "gm" ? "Enter administrative passcode..." : "Enter team passcode..."}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-[#ffffff] border border-[#58585a]/30 pl-10 pr-4 py-3 text-sm text-[#58585a] outline-none focus:border-[#5bc09f] transition-colors"
+                  required
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div
+                className="text-xs text-[#58585a] font-bold bg-[#58585a]/5 border border-[#58585a]/30 p-3 flex items-center gap-2"
+                id="login-error-message"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#58585a] shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 bg-[#5bc09f] text-[#ffffff] hover:bg-[#58585a] border border-[#5bc09f] hover:border-[#58585a] font-display font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              id="submit-login-btn"
+            >
+              {loading ? (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Continue</span>
+                </>
+              )}
+            </button>
+          </motion.form>
+        )}
       </div>
     </div>
   );

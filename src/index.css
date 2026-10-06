@@ -1,115 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Barlow Condensed", "Oswald", sans-serif;
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  --color-accent-gold: #F9B800;
-  --color-texas-gold: #F9B800;
-  --color-texas-gold-light: #FFCF33;
-  --color-texas-red: #BE2403;
-  --color-texas-red-dark: #8F1800;
-  --color-texas-dark: #120F0D;
-  --color-texas-surface: #1C1815;
-  --color-texas-surface-card: #25201C;
+  --color-primary-slate: #58585a;
+  --color-accent-mint: #5bc09f;
+  --color-pure-white: #ffffff;
+  --color-accent-gold: #5bc09f;
 }
 
-/* Custom Bold Typography classes and utilities */
-.massive-text {
-  font-size: 200px;
-  font-weight: 900;
-  line-height: 0.75;
-  letter-spacing: -0.04em;
-  text-transform: uppercase;
-  color: rgba(249, 184, 0, 0.025);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
-  z-index: 0;
-  pointer-events: none;
+body {
+  background-color: #ffffff;
+  color: #58585a;
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-}
-
-@media (max-width: 640px) {
-  .massive-text {
-    font-size: 110px;
-  }
-}
-
-.outline-heading {
-  -webkit-text-stroke: 1.5px rgba(249, 184, 0, 0.85);
-  color: transparent;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .micro-label {
-  font-size: 0.65rem;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-weight: 800;
-  color: #F9B800;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: #58585a;
   display: block;
 }
 
-/* Texas Chicken themed buttons and borders */
-.stark-border {
-  border: 1px solid rgba(249, 184, 0, 0.2);
+.clean-border {
+  border: 1px solid rgba(88, 88, 90, 0.2);
 }
 
-.stark-button {
-  border: 1px solid rgba(249, 184, 0, 0.4);
+.clean-button {
+  border: 1px solid #5bc09f;
   padding: 12px 24px;
   font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-weight: 800;
-  transition: all 0.2s ease-in-out;
-  background-color: #BE2403;
-  color: #ffffff;
-}
-
-.stark-button:hover:not(:disabled) {
-  background-color: #F9B800;
-  color: #120F0D;
-  border-color: #F9B800;
-}
-
-.accent-gold {
-  color: #F9B800;
-}
-
-.bg-stark-dark {
-  background-color: #120F0D;
-}
-
-/* Texas Chicken Signature Elements */
-.texas-star-badge {
-  background: linear-gradient(135deg, #BE2403 0%, #8F1800 100%);
-  border: 1px solid rgba(249, 184, 0, 0.4);
-}
-
-.texas-gold-btn {
-  background-color: #F9B800;
-  color: #120F0D;
-  font-weight: 900;
-  text-transform: uppercase;
   letter-spacing: 0.12em;
-  transition: all 0.2s ease-in-out;
-}
-
-.texas-gold-btn:hover {
-  background-color: #BE2403;
+  font-weight: 700;
+  transition: all 0.15s ease-in-out;
+  background-color: #5bc09f;
   color: #ffffff;
+  font-family: var(--font-display);
 }
 
-.texas-card {
-  background-color: rgba(28, 24, 21, 0.85);
-  border: 1px solid rgba(249, 184, 0, 0.18);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+.clean-button:hover:not(:disabled) {
+  background-color: #58585a;
+  color: #ffffff;
+  border-color: #58585a;
+}
+
+.clean-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(88, 88, 90, 0.18);
 }
 
 

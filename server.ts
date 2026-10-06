@@ -52,7 +52,7 @@ interface SavedState {
 
 // In-Memory state that is backed up to disk
 let state: SavedState = {
-  customTitle: "TEXAS CHICKEN MALAYSIA",
+  customTitle: "TEAM EVENT PORTAL",
   teams: DEFAULT_TEAMS,
   games: DEFAULT_GAMES,
   gallery: [],
@@ -71,6 +71,9 @@ let state: SavedState = {
 
 // Initialize default progress for existing teams if not set
 function verifyProgress() {
+  if (!state.customTitle || state.customTitle.toUpperCase().includes("TEXAS")) {
+    state.customTitle = "TEAM EVENT PORTAL";
+  }
   if (!state.notifications) {
     state.notifications = [];
   }

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
-import { Camera, Image as ImageIcon, Trash2, StopCircle, Play, ArrowLeft, UploadCloud, Film } from "lucide-react";
+import { Camera, Image as ImageIcon, Trash2, StopCircle, ArrowLeft, UploadCloud, Film } from "lucide-react";
 import { GalleryPhoto, Team } from "../types";
 import { formatRealTime, formatRelativeTime } from "../utils/time";
 
@@ -13,18 +13,25 @@ interface CameraGalleryProps {
   onBack: () => void;
 }
 
-export default function CameraGallery({ userRole, currentTeam, gallery, gmPassword, onPhotoUploaded, onBack }: CameraGalleryProps) {
+export default function CameraGallery({
+  userRole,
+  currentTeam,
+  gallery,
+  gmPassword,
+  onPhotoUploaded,
+  onBack
+}: CameraGalleryProps) {
   const [activeTab, setActiveTab] = useState<"camera" | "gallery">("camera");
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [flash, setFlash] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Stop camera stream when component unmounts
   useEffect(() => {
     return () => {
       if (cameraStream) {
@@ -33,7 +40,6 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
     };
   }, [cameraStream]);
 
-  // Utility to compress base64 images using Canvas to keep payloads small and fast
   const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 600): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -60,7 +66,7 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL("image/jpeg", 0.75)); // compress as JPEG with 75% quality
+          resolve(canvas.toDataURL("image/jpeg", 0.75));
         } else {
           resolve(base64Str);
         }
@@ -73,9 +79,10 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
 
   const startCamera = async () => {
     setCameraError("");
+    setStatusMessage("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }, // back camera on mobile
+        video: { facingMode: "environment" },
         audio: false
       });
       setCameraStream(stream);
@@ -99,8 +106,7 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
 
   const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
-    
-    // Trigger flash animation
+
     setFlash(true);
     setTimeout(() => setFlash(false), 250);
 
@@ -112,16 +118,15 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Draw the current video frame onto canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const rawBase64 = canvas.toDataURL("image/png");
 
     setLoading(true);
+    setStatusMessage("");
     try {
       const compressedBase64 = await compressImage(rawBase64);
-      
-      const teamLabel = userRole === "gm" ? "Game Master" : (currentTeam?.name || "Spectator");
-      
+      const teamLabel = userRole === "gm" ? "Game Master" : currentTeam?.name || "Participant";
+
       const res = await fetch("/api/gallery/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -133,12 +138,12 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
 
       if (res.ok) {
         onPhotoUploaded();
-        alert("📸 Photo captured and saved directly to the event gallery!");
+        setStatusMessage("Photo captured and saved to the event gallery.");
       } else {
-        alert("Failed to sync captured photo with server.");
+        setStatusMessage("Failed to sync captured photo with server.");
       }
     } catch (err) {
-      alert("Error saving captured photo.");
+      setStatusMessage("Error saving captured photo.");
     } finally {
       setLoading(false);
     }
@@ -149,8 +154,9 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
     if (!files || files.length === 0) return;
 
     setLoading(true);
+    setStatusMessage("");
     try {
-      const teamLabel = userRole === "gm" ? "Game Master" : (currentTeam?.name || "Spectator");
+      const teamLabel = userRole === "gm" ? "Game Master" : currentTeam?.name || "Participant";
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -172,20 +178,22 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
         });
       }
       onPhotoUploaded();
-      alert("📁 Photos uploaded and synced with gallery!");
+      setStatusMessage("Photos uploaded to the gallery.");
     } catch (err) {
-      alert("Failed to upload some images.");
+      setStatusMessage("Failed to upload some images.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeletePhoto = async (photoId: string) => {
-    if (!confirm("Are you sure you want to delete this photo from the global gallery?")) return;
-    
+    setStatusMessage("");
     try {
-      const passwordKey = userRole === "gm" ? gmPassword : (currentTeam?.password || "");
-      
+      const passwordKey =
+        userRole === "gm"
+          ? gmPassword
+          : currentTeam?.password || localStorage.getItem("event_team_pass") || "";
+
       const res = await fetch("/api/gallery/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -197,12 +205,12 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
 
       if (res.ok) {
         onPhotoUploaded();
-        alert("🗑️ Photo deleted.");
+        setStatusMessage("Photo deleted.");
       } else {
-        alert("Unauthorized. You can only delete photos if you are the GM or of a matching team password.");
+        setStatusMessage("Unauthorized to delete this photo.");
       }
     } catch (err) {
-      alert("Failed to delete photo.");
+      setStatusMessage("Failed to delete photo.");
     }
   };
 
@@ -215,17 +223,26 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
-      {flash && <div className="fixed inset-0 bg-white z-50 pointer-events-none animate-flash duration-200" style={{ animation: "flash 0.25s ease-out" }} />}
-      
+      {flash && (
+        <div
+          className="fixed inset-0 bg-white z-50 pointer-events-none duration-200"
+          style={{ animation: "flash 0.25s ease-out" }}
+        />
+      )}
+
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between pb-4 border-b border-[#58585a]/20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 border border-white/15 bg-black/60 flex items-center justify-center text-white">
-            <Camera className="w-5 h-5 text-accent-gold" />
+          <div className="w-10 h-10 border border-[#5bc09f] bg-[#5bc09f]/10 flex items-center justify-center text-[#5bc09f]">
+            <Camera className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-display font-black text-sm uppercase tracking-wider text-white">Live Lens Gallery</h2>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Capture team snapshots and browse active moments</p>
+            <h2 className="font-display font-bold text-base uppercase tracking-wider text-[#58585a]">
+              Photo Gallery
+            </h2>
+            <p className="text-xs text-[#58585a]/70 mt-0.5">
+              Capture team snapshots and browse shared photos
+            </p>
           </div>
         </div>
         <button
@@ -233,21 +250,27 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
             stopCamera();
             onBack();
           }}
-          className="flex items-center gap-1.5 px-4 py-2 bg-black border border-white/10 text-white hover:bg-white hover:text-black hover:border-white text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#ffffff] border border-[#58585a]/25 text-[#58585a] hover:bg-[#58585a] hover:text-[#ffffff] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Exit</span>
+          <span>Back</span>
         </button>
       </div>
 
+      {statusMessage && (
+        <div className="p-3 border border-[#5bc09f] bg-[#5bc09f]/10 text-xs font-bold text-[#58585a]">
+          {statusMessage}
+        </div>
+      )}
+
       {/* Tabs */}
-      <div className="flex gap-2 p-1 bg-black border border-white/10">
+      <div className="flex gap-2 p-1 bg-[#ffffff] border border-[#58585a]/20">
         <button
           onClick={() => switchTab("camera")}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 font-black text-xs uppercase tracking-widest cursor-pointer transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 font-bold text-xs uppercase tracking-wider cursor-pointer transition-colors ${
             activeTab === "camera"
-              ? "bg-white text-black border border-white"
-              : "text-gray-500 hover:text-white"
+              ? "bg-[#5bc09f] text-[#ffffff]"
+              : "text-[#58585a] hover:bg-[#58585a]/5"
           }`}
         >
           <Camera className="w-4 h-4" />
@@ -255,10 +278,10 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
         </button>
         <button
           onClick={() => switchTab("gallery")}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 font-black text-xs uppercase tracking-widest cursor-pointer transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 font-bold text-xs uppercase tracking-wider cursor-pointer transition-colors ${
             activeTab === "gallery"
-              ? "bg-white text-black border border-white"
-              : "text-gray-500 hover:text-white"
+              ? "bg-[#5bc09f] text-[#ffffff]"
+              : "text-[#58585a] hover:bg-[#58585a]/5"
           }`}
         >
           <ImageIcon className="w-4 h-4" />
@@ -269,7 +292,7 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
       {/* Camera View */}
       {activeTab === "camera" && (
         <div className="space-y-4">
-          <div className="aspect-[4/3] bg-black border border-white/10 overflow-hidden relative">
+          <div className="aspect-[4/3] bg-[#ffffff] border border-[#58585a]/20 overflow-hidden relative">
             {cameraActive ? (
               <video
                 ref={videoRef}
@@ -278,38 +301,30 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 text-gray-500">
-                <div className="w-12 h-12 border border-white/10 bg-black flex items-center justify-center mb-4 text-white">
-                  <Film className="w-5 h-5 text-accent-gold" />
+              <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 text-[#58585a]">
+                <div className="w-12 h-12 border border-[#5bc09f] bg-[#5bc09f]/10 flex items-center justify-center mb-4 text-[#5bc09f]">
+                  <Film className="w-5 h-5" />
                 </div>
                 {cameraError ? (
-                  <p className="text-red-400 text-xs font-mono font-black uppercase tracking-wider max-w-sm mb-4">{cameraError}</p>
+                  <p className="text-[#58585a] text-xs font-bold max-w-sm mb-4">
+                    {cameraError}
+                  </p>
                 ) : (
                   <>
-                    <p className="text-xs font-mono font-black uppercase tracking-wider text-white">Camera Feed Closed</p>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1 max-w-xs leading-relaxed">Start your environment lens to capture championship moments</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#58585a]">
+                      Camera Feed Inactive
+                    </p>
+                    <p className="text-xs text-[#58585a]/70 mt-1 max-w-xs">
+                      Start your camera to capture team photos
+                    </p>
                   </>
                 )}
                 <button
                   onClick={startCamera}
-                  className="mt-6 px-5 py-3 bg-white text-black hover:bg-black hover:text-white hover:border-white border border-white text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+                  className="mt-5 px-5 py-2.5 bg-[#5bc09f] text-[#ffffff] hover:bg-[#58585a] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                 >
                   Turn On Camera
                 </button>
-              </div>
-            )}
-
-            {/* Scanning overlay frame */}
-            {cameraActive && (
-              <div className="absolute inset-4 border border-white/10 pointer-events-none flex flex-col justify-between p-4">
-                <div className="flex justify-between">
-                  <span className="w-4 h-4 border-t-2 border-l-2 border-white/40" />
-                  <span className="w-4 h-4 border-t-2 border-r-2 border-white/40" />
-                </div>
-                <div className="flex justify-between">
-                  <span className="w-4 h-4 border-b-2 border-l-2 border-white/40" />
-                  <span className="w-4 h-4 border-b-2 border-r-2 border-white/40" />
-                </div>
               </div>
             )}
           </div>
@@ -320,14 +335,14 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
                 <button
                   onClick={capturePhoto}
                   disabled={loading}
-                  className="flex-1 py-4 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 py-3.5 bg-[#5bc09f] hover:bg-[#58585a] disabled:opacity-50 text-[#ffffff] font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Camera className="w-5 h-5" />
-                  <span>{loading ? "Capturing..." : "Capture Moment"}</span>
+                  <span>{loading ? "Capturing..." : "Capture Photo"}</span>
                 </button>
                 <button
                   onClick={stopCamera}
-                  className="px-5 py-4 bg-black border border-white/10 hover:border-white text-white transition-all cursor-pointer"
+                  className="px-5 py-3.5 bg-[#ffffff] border border-[#58585a]/30 hover:bg-[#58585a] hover:text-[#ffffff] text-[#58585a] transition-colors cursor-pointer"
                 >
                   <StopCircle className="w-5 h-5" />
                 </button>
@@ -346,10 +361,10 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
                 <button
                   onClick={() => document.getElementById("file-upload-input")?.click()}
                   disabled={loading}
-                  className="w-full py-4 bg-black border border-dashed border-white/15 hover:border-white text-white font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                  className="w-full py-4 bg-[#ffffff] border border-dashed border-[#58585a]/35 hover:border-[#5bc09f] text-[#58585a] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
                 >
-                  <UploadCloud className="w-5 h-5 text-accent-gold" />
-                  <span>{loading ? "Processing..." : "Select Photos From Local Device"}</span>
+                  <UploadCloud className="w-5 h-5 text-[#5bc09f]" />
+                  <span>{loading ? "Uploading..." : "Select Photos From Device"}</span>
                 </button>
               </div>
             )}
@@ -362,38 +377,43 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
       {activeTab === "gallery" && (
         <div className="space-y-4">
           {gallery.length === 0 ? (
-            <div className="border border-white/10 bg-black/30 p-12 text-center text-gray-500">
-              <ImageIcon className="w-10 h-10 text-gray-500 mx-auto mb-4" />
-              <p className="text-xs font-mono font-black uppercase tracking-wider text-white">No photos in the gallery yet</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Captured moment snapshots will automatically sync here</p>
+            <div className="border border-[#58585a]/20 bg-[#ffffff] p-12 text-center text-[#58585a]">
+              <ImageIcon className="w-8 h-8 text-[#58585a]/50 mx-auto mb-3" />
+              <p className="text-xs font-bold uppercase tracking-wider text-[#58585a]">
+                No photos in the gallery yet
+              </p>
+              <p className="text-xs text-[#58585a]/70 mt-1">
+                Uploaded and captured photos will appear here
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4" id="global-gallery-grid">
               {gallery.map((photo) => (
                 <motion.div
                   key={photo.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="aspect-square bg-black border border-white/10 overflow-hidden relative group"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="aspect-square bg-[#58585a]/5 border border-[#58585a]/20 overflow-hidden relative group"
                 >
                   <img
                     src={photo.url}
                     alt="Captured Moment"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
                   />
-                  
-                  {/* Photo details on hover overlay */}
-                  <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                    <p className="font-black text-xs text-white uppercase tracking-wider truncate">{photo.teamName}</p>
-                    <span className="text-[9px] font-mono text-accent-gold block mt-1 uppercase tracking-widest">
-                      {formatRealTime(photo.timestamp)} {formatRelativeTime(photo.timestamp) ? `• ${formatRelativeTime(photo.timestamp)}` : ""}
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-4">
+                    <p className="font-bold text-xs text-[#ffffff] uppercase tracking-wider truncate">
+                      {photo.teamName}
+                    </p>
+                    <span className="text-[10px] font-mono text-[#ffffff]/80 block mt-0.5">
+                      {formatRealTime(photo.timestamp)}{" "}
+                      {formatRelativeTime(photo.timestamp) ? `· ${formatRelativeTime(photo.timestamp)}` : ""}
                     </span>
-                    
-                    {/* Delete button (displays on group-hover overlay) */}
+
                     <button
                       onClick={() => handleDeletePhoto(photo.id)}
-                      className="absolute top-2 right-2 w-7 h-7 bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-red-700 cursor-pointer"
+                      className="absolute top-2 right-2 w-7 h-7 bg-[#58585a] text-[#ffffff] flex items-center justify-center hover:bg-[#5bc09f] transition-colors cursor-pointer"
                       title="Delete snapshot"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -406,7 +426,6 @@ export default function CameraGallery({ userRole, currentTeam, gallery, gmPasswo
         </div>
       )}
 
-      {/* Style for flash animation */}
       <style>{`
         @keyframes flash {
           0% { opacity: 1; }

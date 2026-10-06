@@ -1,12 +1,12 @@
 {
-  "customTitle": "TEXAS CHICKEN MALAYSIA",
+  "customTitle": "TEAM EVENT PORTAL",
   "teams": [
     {
       "id": 1,
       "name": "Team Alpha",
       "banner": "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&auto=format&fit=crop&q=80",
       "score": 200,
-      "color": "#ef4444",
+      "color": "#5bc09f",
       "password": "alpha"
     },
     {
@@ -14,7 +14,7 @@
       "name": "Team Beta",
       "banner": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&auto=format&fit=crop&q=80",
       "score": 150,
-      "color": "#3b82f6",
+      "color": "#58585a",
       "password": "beta"
     },
     {
@@ -22,7 +22,7 @@
       "name": "Team Gamma",
       "banner": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&auto=format&fit=crop",
       "score": 180,
-      "color": "#10b981",
+      "color": "#3b9b7e",
       "password": "gamma"
     }
   ],

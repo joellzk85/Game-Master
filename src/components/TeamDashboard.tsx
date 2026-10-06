@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Award, Camera, Trophy, Eye, EyeOff, Lock, RefreshCw, Upload, Sparkles, Radio, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
+import { Camera, Trophy, Lock, Upload, Radio } from "lucide-react";
 import { AppState, Team } from "../types";
-import TexasDrumstickBadge from "./TexasDrumstickBadge";
 import { formatRealTime, formatRelativeTime } from "../utils/time";
 import BannerModal from "./BannerModal";
 
@@ -27,9 +26,8 @@ export default function TeamDashboard({
   onNavigate,
   onLogout
 }: TeamDashboardProps) {
-  // Sync current team state because other GMs might have adjusted points or parameters since they logged in
   const team = state.teams.find((t) => t.id === currentTeam.id) || currentTeam;
-  
+
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
   const rank = sorted.findIndex((t) => t.id === team.id) + 1;
 
@@ -79,18 +77,14 @@ export default function TeamDashboard({
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
-      
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#F9B800]/20">
-        <div className="flex items-center gap-2.5">
-          <TexasDrumstickBadge size="xs" />
-          <h2 className="font-display font-black text-sm uppercase tracking-[0.2em] text-white flex items-center gap-2">
-            <span>TEAM PORTAL OVERVIEW</span>
-          </h2>
-        </div>
+      <div className="flex items-center justify-between pb-4 border-b border-[#58585a]/20">
+        <h2 className="font-display font-bold text-sm uppercase tracking-widest text-[#58585a]">
+          Team Portal Overview
+        </h2>
         <button
           onClick={onLogout}
-          className="px-4 py-2 bg-[#14110F] border border-[#BE2403]/50 text-[#FF7A7A] hover:bg-[#BE2403] hover:text-white hover:border-[#BE2403] text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow-md"
+          className="px-4 py-2 bg-[#ffffff] border border-[#58585a]/30 text-[#58585a] hover:bg-[#58585a] hover:text-[#ffffff] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
         >
           Logout
         </button>
@@ -110,44 +104,37 @@ export default function TeamDashboard({
 
         return (
           <div
-            className={`p-4 border relative overflow-hidden transition-all shadow-lg ${
+            className={`p-4 border transition-all ${
               isDirect
-                ? "bg-[#BE2403]/20 border-[#BE2403]"
-                : "bg-[#1C1815] border-[#F9B800]/40"
+                ? "bg-[#5bc09f]/10 border-[#5bc09f]"
+                : "bg-[#ffffff] border-[#58585a]/25"
             }`}
           >
             <div className="flex items-center justify-between gap-2 mb-1.5">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#F9B800] flex items-center gap-1.5">
-                  <Radio className="w-3.5 h-3.5 text-[#F9B800]" />
-                  {isDirect ? "DIRECT TRANSMISSION FOR YOUR TEAM" : "LATEST GM BROADCAST"}
+                <span className="w-2 h-2 rounded-full bg-[#5bc09f]" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#58585a] flex items-center gap-1.5">
+                  <Radio className="w-3.5 h-3.5 text-[#5bc09f]" />
+                  {isDirect ? "Direct Message for Your Team" : "Latest GM Broadcast"}
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-gray-400 flex items-center gap-1">
-                {formatRealTime(latest.timestamp)}
-                <span className="text-gray-500 text-[9px]">({formatRelativeTime(latest.timestamp)})</span>
+              <span className="text-[11px] font-mono text-[#58585a]/70">
+                {formatRealTime(latest.timestamp)} · {formatRelativeTime(latest.timestamp)}
               </span>
             </div>
 
             <div className="flex items-start justify-between gap-3">
-              <h4 className="font-display font-black text-xs uppercase tracking-wider text-white">
+              <h4 className="font-display font-bold text-xs uppercase tracking-wider text-[#58585a]">
                 {latest.title}
               </h4>
               {isScore && points !== 0 && (
-                <span
-                  className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-xs border ${
-                    points > 0
-                      ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400"
-                      : "bg-rose-500/10 border-rose-500/40 text-rose-400"
-                  }`}
-                >
+                <span className="text-xs font-mono font-bold text-[#5bc09f] tabular-nums">
                   {points > 0 ? `+${points}` : points} PTS
                 </span>
               )}
             </div>
 
-            <p className="text-xs text-gray-300 mt-1 leading-relaxed">
+            <p className="text-xs text-[#58585a]/85 mt-1 leading-relaxed">
               {latest.message}
             </p>
           </div>
@@ -155,22 +142,21 @@ export default function TeamDashboard({
       })()}
 
       {/* Team Banner / Card block */}
-      <div className="border border-[#F9B800]/30 bg-[#1C1815]/90 relative overflow-hidden shadow-xl">
+      <div className="border border-[#58585a]/20 bg-[#ffffff] relative overflow-hidden">
         <div
-          className="h-44 bg-cover bg-center relative transition-transform duration-700"
-          style={{ backgroundImage: `url('${team.banner}')` }}
+          className="h-44 bg-cover bg-center relative bg-[#58585a]/10"
+          style={{ backgroundImage: team.banner ? `url('${team.banner}')` : undefined }}
         >
-          {/* Overlay Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1C1815] via-[#1C1815]/50 to-transparent" />
-          
-          {/* Team Name badge */}
+          {/* Contrast Scrim */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+
+          {/* Team Name */}
           <div className="absolute bottom-4 left-6">
-            <h3 className="font-display font-black text-2xl uppercase tracking-tight" style={{ color: team.color }}>
+            <h3 className="font-display font-bold text-2xl uppercase tracking-tight text-[#ffffff]">
               {team.name}
             </h3>
-            <p className="text-[10px] text-gray-300 font-bold uppercase tracking-wider mt-1 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#F9B800]" />
-              <span>Texas Chicken Championship Contender</span>
+            <p className="text-xs text-[#ffffff]/85 font-medium mt-0.5">
+              Registered Event Team
             </p>
           </div>
 
@@ -179,39 +165,41 @@ export default function TeamDashboard({
             <button
               type="button"
               onClick={() => setShowBannerModal(true)}
-              className="px-3.5 py-2 bg-[#14110F]/90 border border-[#F9B800]/40 hover:border-[#F9B800] text-[10px] font-black uppercase tracking-wider hover:bg-[#BE2403] transition-all text-white cursor-pointer flex items-center gap-1.5 shadow"
+              className="px-3.5 py-2 bg-[#ffffff] border border-[#58585a]/30 hover:border-[#5bc09f] hover:bg-[#5bc09f] text-[#58585a] hover:text-[#ffffff] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
             >
-              <Upload className="w-3.5 h-3.5 text-[#F9B800]" />
-              <span>Change Card Art</span>
+              <Upload className="w-3.5 h-3.5" />
+              <span>Change Banner</span>
             </button>
           </div>
         </div>
 
         {/* Dynamic Standing indicators */}
-        <div className="p-6 grid grid-cols-2 gap-4 divide-x divide-[#F9B800]/20">
+        <div className="p-6 grid grid-cols-2 gap-4 divide-x divide-[#58585a]/15">
           <div className="text-center sm:text-left">
-            <span className="micro-label">🍗 Championship Score</span>
-            <div className="font-display font-black text-4xl mt-1 font-mono tracking-tight text-[#F9B800]">
+            <span className="micro-label">Current Score</span>
+            <div className="font-display font-bold text-4xl mt-1 font-mono tracking-tight text-[#5bc09f] tabular-nums">
               {team.score}
             </div>
-            <span className="text-[9px] text-gray-400 uppercase tracking-widest font-bold block mt-0.5">Points Awarded</span>
+            <span className="text-xs text-[#58585a]/70 block mt-0.5">Points Awarded</span>
           </div>
 
           <div className="text-center sm:text-left pl-4">
-            <span className="micro-label">🍗 Live Rankings Stand</span>
-            <div className="font-display font-black text-4xl mt-1 text-white font-mono tracking-tight">
+            <span className="micro-label">Live Standing</span>
+            <div className="font-display font-bold text-4xl mt-1 text-[#58585a] font-mono tracking-tight tabular-nums">
               #{rank}
             </div>
-            <span className="text-[9px] text-gray-400 uppercase tracking-widest font-bold block mt-0.5">out of {state.teams.length} teams</span>
+            <span className="text-xs text-[#58585a]/70 block mt-0.5">
+              of {state.teams.length} teams
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Games Round Board */}
-      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-4 shadow-md">
+      {/* Approved Games Round Board */}
+      <div className="border border-[#58585a]/20 bg-[#ffffff] p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <span className="micro-label">🍗 Approved Tournament Games</span>
-          <span className="text-[10px] font-mono text-[#F9B800] uppercase tracking-wider">
+          <span className="micro-label">Approved Games</span>
+          <span className="text-xs font-mono font-bold text-[#5bc09f] uppercase tracking-wider tabular-nums">
             {state.games.filter((g) => g.open).length} Active
           </span>
         </div>
@@ -221,13 +209,13 @@ export default function TeamDashboard({
 
           if (approvedGames.length === 0) {
             return (
-              <div className="p-8 text-center border border-[#F9B800]/10 bg-[#14110F]/80 space-y-2">
-                <Lock className="w-8 h-8 text-[#F9B800]/60 mx-auto" />
-                <h4 className="font-display font-black text-sm uppercase tracking-wider text-gray-300">
+              <div className="p-8 text-center border border-[#58585a]/15 bg-[#ffffff] space-y-2">
+                <Lock className="w-7 h-7 text-[#58585a]/50 mx-auto" />
+                <h4 className="font-display font-bold text-sm uppercase tracking-wider text-[#58585a]">
                   No Games Currently Unlocked
                 </h4>
-                <p className="text-xs text-gray-400 font-light max-w-sm mx-auto">
-                  The Game Master has not opened any tournament rounds yet. Stand by for live broadcast instructions.
+                <p className="text-xs text-[#58585a]/70 max-w-sm mx-auto">
+                  The Game Master has not approved any rounds yet. Stand by for live broadcast instructions.
                 </p>
               </div>
             );
@@ -244,35 +232,34 @@ export default function TeamDashboard({
                     key={game.id}
                     whileHover={canPlay ? { y: -2 } : {}}
                     onClick={() => canPlay && onNavigate("csi-game")}
-                    className={`p-5 border flex flex-col justify-between min-h-[140px] transition-all relative overflow-hidden ${
+                    className={`p-5 border flex flex-col justify-between min-h-[130px] transition-colors relative ${
                       canPlay
-                        ? "border-[#F9B800]/40 bg-[#BE2403]/10 hover:border-[#F9B800] hover:bg-[#BE2403]/20 cursor-pointer shadow-md"
-                        : "border-[#F9B800]/20 bg-[#14110F]/80 text-white"
+                        ? "border-[#5bc09f] bg-[#5bc09f]/5 hover:bg-[#5bc09f]/10 cursor-pointer"
+                        : "border-[#58585a]/20 bg-[#ffffff] text-[#58585a]"
                     }`}
                   >
-                    {/* Glowing status tag */}
-                    <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-[#BE2403] border border-[#F9B800]/40 text-[#F9B800] text-[9px] font-black px-2.5 py-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#F9B800] animate-ping" />
-                      <span>ACTIVE</span>
-                    </div>
-
-                    <div>
-                      <span className="text-2xl block mb-2">{isCSI ? "🔍" : "🎯"}</span>
-                      <h4 className="font-display font-black text-sm uppercase tracking-wider text-white">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <h4 className="font-display font-bold text-sm uppercase tracking-wider text-[#58585a]">
                         {game.name}
                       </h4>
-                      <p className="text-xs text-gray-300 mt-1 font-light">
-                        {isCSI ? "Forensic photo scavenger hunt & AI validation" : "Approved by Game Master"}
-                      </p>
+                      <span className="text-[10px] font-mono font-bold uppercase text-[#5bc09f]">
+                        ACTIVE
+                      </span>
                     </div>
 
+                    <p className="text-xs text-[#58585a]/75">
+                      {isCSI
+                        ? "Photo scavenger hunt & AI verification"
+                        : "Approved by Game Master"}
+                    </p>
+
                     {canPlay ? (
-                      <span className="text-[11px] font-black uppercase tracking-wider text-[#F9B800] mt-3 flex items-center gap-1 hover:underline">
-                        🍗 Click to Play Challenge →
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#5bc09f] mt-4 inline-block">
+                        Open Challenge →
                       </span>
                     ) : (
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 mt-3 flex items-center gap-1">
-                        ✓ Open for participation
+                      <span className="text-xs font-mono text-[#58585a]/70 mt-4 inline-block">
+                        Unlocked for participation
                       </span>
                     )}
                   </motion.div>
@@ -283,33 +270,33 @@ export default function TeamDashboard({
         })()}
       </div>
 
-      {/* Navigation Quick Links block with Texas Chicken styled buttons */}
+      {/* Navigation Quick Links */}
       <div className="grid grid-cols-2 gap-4">
         <button
           onClick={() => onNavigate("leaderboard")}
-          className="flex flex-col items-center justify-center p-6 border border-[#F9B800]/20 bg-[#1C1815] hover:bg-[#BE2403] hover:text-white hover:border-[#F9B800] transition-all duration-200 text-center cursor-pointer group shadow-md"
+          className="flex flex-col items-center justify-center p-6 border border-[#58585a]/20 bg-[#ffffff] text-[#58585a] hover:border-[#5bc09f] hover:bg-[#5bc09f] hover:text-[#ffffff] transition-colors text-center cursor-pointer group"
         >
-          <Trophy className="w-6 h-6 text-[#F9B800] mb-2 group-hover:scale-110 transition-transform" />
-          <span className="font-display font-black text-xs uppercase tracking-widest">Leaderboard</span>
-          <span className="text-[9px] text-gray-400 uppercase mt-1 group-hover:text-white/80">View Standings</span>
+          <Trophy className="w-6 h-6 text-[#5bc09f] group-hover:text-[#ffffff] mb-2 transition-colors" />
+          <span className="font-display font-bold text-xs uppercase tracking-widest">Leaderboard</span>
+          <span className="text-[11px] opacity-75 mt-1">View Standings</span>
         </button>
 
         <button
           onClick={() => onNavigate("camera")}
-          className="flex flex-col items-center justify-center p-6 border border-[#F9B800]/20 bg-[#1C1815] hover:bg-[#BE2403] hover:text-white hover:border-[#F9B800] transition-all duration-200 text-center cursor-pointer group shadow-md"
+          className="flex flex-col items-center justify-center p-6 border border-[#58585a]/20 bg-[#ffffff] text-[#58585a] hover:border-[#5bc09f] hover:bg-[#5bc09f] hover:text-[#ffffff] transition-colors text-center cursor-pointer group"
         >
-          <Camera className="w-6 h-6 text-[#F9B800] mb-2 group-hover:scale-110 transition-transform" />
-          <span className="font-display font-black text-xs uppercase tracking-widest">Live Lens</span>
-          <span className="text-[9px] text-gray-400 uppercase mt-1 group-hover:text-white/80">Browse Photos</span>
+          <Camera className="w-6 h-6 text-[#5bc09f] group-hover:text-[#ffffff] mb-2 transition-colors" />
+          <span className="font-display font-bold text-xs uppercase tracking-widest">Photo Gallery</span>
+          <span className="text-[11px] opacity-75 mt-1">Browse & Capture</span>
         </button>
       </div>
 
       {/* Change Password Block */}
-      <div className="border border-[#F9B800]/20 bg-[#1C1815]/90 p-6 space-y-4 shadow-md">
-        <span className="micro-label">🔑 Security: Update Team Password</span>
+      <div className="border border-[#58585a]/20 bg-[#ffffff] p-6 space-y-4">
+        <span className="micro-label">Update Team Passcode</span>
 
-        {pwSuccess && <p className="text-xs text-emerald-400 font-bold">{pwSuccess}</p>}
-        {pwError && <p className="text-xs text-red-400 font-bold">{pwError}</p>}
+        {pwSuccess && <p className="text-xs text-[#5bc09f] font-bold">{pwSuccess}</p>}
+        {pwError && <p className="text-xs text-[#58585a] font-bold">{pwError}</p>}
 
         <form onSubmit={handleUpdatePassword} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input
@@ -317,7 +304,7 @@ export default function TeamDashboard({
             value={currentPw}
             onChange={(e) => setCurrentPw(e.target.value)}
             placeholder="Current passcode..."
-            className="bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-sm text-white outline-none focus:border-[#F9B800] transition-all font-mono"
+            className="bg-[#ffffff] border border-[#58585a]/30 px-4 py-3 text-sm text-[#58585a] outline-none focus:border-[#5bc09f] transition-colors"
             required
           />
           <input
@@ -325,15 +312,15 @@ export default function TeamDashboard({
             value={newPw}
             onChange={(e) => setNewPw(e.target.value)}
             placeholder="New passcode..."
-            className="bg-[#14110F] border border-[#F9B800]/30 px-4 py-3 text-sm text-white outline-none focus:border-[#F9B800] transition-all font-mono"
+            className="bg-[#ffffff] border border-[#58585a]/30 px-4 py-3 text-sm text-[#58585a] outline-none focus:border-[#5bc09f] transition-colors"
             required
           />
           <button
             type="submit"
             disabled={updatingPw}
-            className="bg-[#F9B800] text-[#120F0D] hover:bg-[#BE2403] hover:text-white border border-[#F9B800] hover:border-[#BE2403] font-black text-xs uppercase tracking-widest transition-all cursor-pointer p-3 font-display"
+            className="bg-[#5bc09f] text-[#ffffff] hover:bg-[#58585a] border border-[#5bc09f] hover:border-[#58585a] font-display font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer p-3"
           >
-            {updatingPw ? "Saving..." : "Change Passcode"}
+            {updatingPw ? "Saving..." : "Update Passcode"}
           </button>
         </form>
       </div>
